@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 const env = require('dotenv').config();
 const mongoose = require('mongoose');
 const { Schema, Model } = mongoose;
+const Item = require("./models/item")
 
 mongoose.connect(process.env.MONGO_URI);
 
@@ -63,21 +64,21 @@ const fetchText = async (done) => { //TODO: View
 }
 
 
-const Item = mongoose.model(
-  'Item',
-  new Schema({
-    name: String,
-    image: String,
-    brand: String,
-    category: String,
-    edition: String,
-    additional: String,
-    price: Number,
-    stock: Number,
-    condition: String,
-    user_id: String,
-  })
-)
+// const Item = mongoose.model(
+//   'Item',
+//   new Schema({
+//     name: String,
+//     image: String,
+//     brand: String,
+//     category: String,
+//     edition: String,
+//     additional: String,
+//     price: Number,
+//     stock: Number,
+//     condition: String,
+//     user_id: String,
+//   })
+// )
 
 const User = mongoose.model(
   'User',

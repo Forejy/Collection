@@ -81,3 +81,12 @@ a {
 .category-header h1 {
   line-height: 1em;
 }
+
+.item-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.item-image {
+  width: 25vw;
+}
