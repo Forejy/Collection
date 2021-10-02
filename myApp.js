@@ -20,132 +20,166 @@ mongoose.connect(process.env.MONGO_URI);
 }
 
 
-const fetchText = async (done) => { //TODO: View
-  Item.deleteMany({}, async function() {
-    let objArray;
-    try {
-      console.log("2")
-      const url = "https://api.pokemontcg.io/v2/cards?q=set.id:sm9&pageSize=10";
-      const meta = {
-        'X-Api-Key': process.env.pokemontcgAPI
-      }
-      const headers = new Headers(meta)
-      console.log("3 headers: ", headers)
-      const response = await fetch(url, {
-        headers: headers
-      });
-      console.log("4")
-      console.log("response: ", response)
-      const data = (await response.json()).data;
-      console.log("DATA: ", data)
-      objArray = data.map(elem => new Item({
-        name: elem.name,
-        image: elem.images.large,
-        brand: "?",
-        category: "?",
-        edition: elem.set.series + " - " + elem.set.name,
-        additional: "",
-        price: elem.cardmarket.prices.averageSellPrice,
-        stock: 7,
-        condition: "New",
-        user_id: "1"
-      }))
-      console.log("OBJECT ARRAY: ", objArray);
-    } catch (err) {
-      console.log("error: ", err)
-      done(err)
-    }
-
-    Item.create(objArray, function(err, items) {
-      if (err) return done(err)
-      done(null, items)
-    })
+const createManyItems = (done, objArray) => {
+  console.log("objArray: ", objArray)
+  Item.create(objArray, function(err, items) {
+    if (err) return done(err)
+    done(null, items)
   })
 }
 
-
-// const Item = mongoose.model(
-//   'Item',
-//   new Schema({
-//     name: String,
-//     image: String,
-//     brand: String,
-//     category: String,
-//     edition: String,
-//     additional: String,
-//     price: Number,
-//     stock: Number,
-//     condition: String,
-//     user_id: String,
-//   })
-// )
-
-const User = mongoose.model(
-  'User',
-  new Schema({
-    name: String,
-    items: Array
+const removeManyItems = (done, nameToRemove) => {
+  Item.remove({ name: nameToRemove }, function(err, personFound) {
+    Item.find({}, function(err, personFound) {
+      if (err) return console.log(err);
+      done(null, personFound);
+    })
   })
-)
+};
 
 
-const user = new User ({
-  name: "vendeur64",
-  items: []
-})
+const fetchPokemonCards = async (done) => { //TODO: View
+  let objArray;
+  try {
+    const url = "https://api.pokemontcg.io/v2/cards?q=set.id:sm9&pageSize=10";
+    const meta = {
+      'X-Api-Key': process.env.pokemontcgAPI
+    }
+    const headers = new Headers(meta)
+    const response = await fetch(url, {
+      headers: headers
+    });
+    const data = (await response.json()).data;
+    objArray = data.map(elem => new Item({
+      name: elem.name,
+      image: elem.images.large,
+      brand: "?",
+      category: "?",
+      edition: elem.set.series + " - " + elem.set.name,
+      additional: "",
+      price: elem.cardmarket.prices.averageSellPrice,
+      stock: 7,
+      condition: "New",
+      user_id: "1"
+    }))
+  } catch (err) {
+    done(err)
+  }
 
-const item = new Item ({
-  name: "PikachuEX",
-  brand: "Pokemon",
-  category: "Card",
-  edition: "XY124",
-  additional: "Promo",
-  price: 2,
-  stock: 12,
-  Condtion: "Comme Neuve",
-  user_id: user.id
-})
+  createManyItems(done, objArray)
+}
+
+const fetchMagicCards = async (done) => {
+  console.log("FETCH: fetchMagicCards");
+  const url = "https://api.magicthegathering.io/v1/cards?pageSize=10"
+  let objArray;
+
+  try {
+    const response = await fetch(url);
+    const json = (await response.json()).cards;
+
+    objArray = json.map(elem => new Item({
+      name: elem.name,
+      image: elem.imageUrl,
+      brand: "Magic",
+      category: "Card",
+      edition: elem.setName,
+      additional: "",
+      price: (Math.random() * 100).toFixed(2),
+      stock: Math.floor(Math.random() * 20),
+      condition: "New",
+      user_id: "1"
+    }))
+  } catch (err) {
+    done(err)
+  }
+
+  // createManyItems(done, objArray)
+  Item.find({}, function (err, items) {
+    if (err) return done(err)
+    done(null, items)
+  })
+
+}
+
+const fetchYugiohCards = async (done) => {
+  console.log("FETCH: fetchYugiohCards");
+  const url = "https://db.ygoprodeck.com/api/v7/cardinfo.php?cardset=metal%20raiders"
+  let objArray;
+
+  try {
+    const response = await fetch(url);
+    const json = (await response.json()).data.slice(0, 10);
 
 
-const test = (done) => {
-  Item.deleteMany({}, function(err, result) {
-    if (err) return next(err)
-    console.log(result)
+    objArray = json.map(elem => new Item({
+      name: elem.name,
+      image: elem.card_images[0].image_url,
+      brand: "Yugioh",
+      category: "Card",
+      edition: "Metal Raiders",
+      additional: "",
+      price: (Math.random() * 100).toFixed(2),
+      stock: Math.floor(Math.random() * 20),
+      condition: "New",
+      user_id: "1"
+    }))
+  } catch (err) {
+    done(err)
+  }
 
-    User.deleteMany({}, function(err, result) {
+
+  // done(null, objArray)
+  // createManyItems(done, objArray)
+  // Item.find({ }, function (err, items) {
+  //   if (err) return done(err)
+  //   done(null, items)
+  // })
+
+}
+
+
+// TEST
+{
+  const test = (done) => {
+    Item.deleteMany({}, function(err, result) {
       if (err) return next(err)
       console.log(result)
 
-      user.save(function (err, user) {
-        if (err) return done(err)
-        console.log("user w/out items saved: ", user);
+      User.deleteMany({}, function(err, result) {
+        if (err) return next(err)
+        console.log(result)
 
-        item.save(function(err, item) {
+        user.save(function (err, user) {
           if (err) return done(err)
-          console.log("item saved: ", item);
+          console.log("user w/out items saved: ", user);
 
-          console.log(user);
-          user.items = [ item._id ];
-          console.log(user);
-          user.save(function(err, user) {
-            User.find({}, function(err, users) {
-              if (err) return done(err)
-              console.log("users: ", users)
-              done(null, users)
-            })
-          });
+          item.save(function(err, item) {
+            if (err) return done(err)
+            console.log("item saved: ", item);
+
+            console.log(user);
+            user.items = [ item._id ];
+            console.log(user);
+            user.save(function(err, user) {
+              User.find({}, function(err, users) {
+                if (err) return done(err)
+                console.log("users: ", users)
+                done(null, users)
+              })
+            });
+
+          })
 
         })
+      });
 
-      })
     });
-
-  });
+  }
 }
 
 
 
-exports.ItemModel = Item;
-exports.UserModel = User;
-exports.test = test;
-exports.fetchText = fetchText;
+exports.fetchPokemonCards = fetchPokemonCards;
+exports.fetchMagicCards = fetchMagicCards;
+exports.fetchYugiohCards = fetchYugiohCards;

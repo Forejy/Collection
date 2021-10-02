@@ -1,5 +1,17 @@
 extends layout
 
-block content
-  h1= title
-  p Welcome to #{title}
+block body
+  section TEST login
+    if currentUser
+      div #{currentUser.username}
+  each package in packages
+    section
+      header.category-header
+        h1
+          a(href="./brand/" + package.brand)= package.brand
+      section.item-list
+        each item in package.item
+          article.item-list__item
+            a(href="./item/" + item._id)
+              img(class="item-list__item-image" src=item.image)
+            div=item.price

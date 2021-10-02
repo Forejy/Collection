@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+// PASSPORT
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require("passport-local").Strategy;
+const User = require('./models/user')
+
 
 var createError = require('http-errors');
 var express = require('express');
@@ -34,8 +40,10 @@ mongoose.connect(process.env.MONGO_URI)
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const categoryRouter = require('./routes/category');
-const allRouter = require('./routes/all');
+const fetchRouter = require('./routes/fetch');
+const brandRouter = require('./routes/brand');
+const itemRouter = require('./routes/item');
+const { isRedirect } = require('node-fetch');
 
 
 // view engine setup
@@ -47,11 +55,70 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ secret: 'keyboard cat' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(function(req, res, next) {
+  res.locals.currentUser = req.user;
+  next();
+})
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/test', allRouter); //A supprimer à un moment donné
-app.use('/category', categoryRouter);
+app.use('/fetch', fetchRouter); //A supprimer à un moment donné
+app.use('/brand', brandRouter);
+app.use('/item', itemRouter);
+app.get('/login', (req, res) => { res.render('log-in')})
+app.get('/signup', (req, res) => { res.render('sign-up')})
+
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+
+  User.findOne({ username: username }, function (err, user) {
+    if (err) { return done(err); }
+    if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+      if (user.password != password) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      console.log('LOGIN3')
+      return done(null, user);
+    });
+  }
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+
+
+app.post('/login',
+passport.authenticate('local', { failureRedirect: '/login' }),
+  function(req, res) {
+console.log('LOGIN')
+
+    res.redirect('/');
+  });
+
+app.post('/sign-up', function(req, res) {
+  new User({
+    username: req.body.username,
+    password: req.body.password
+  }).save(function(err) {
+    if (err) done(err)
+    res.redirect('/')
+  })
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

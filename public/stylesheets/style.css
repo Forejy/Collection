@@ -42,8 +42,10 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+
 a {
-  color: none;
+  color: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -63,6 +65,20 @@ a {
   color: #666;
 }
 
+/* MARK: Item */
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30%;
+  margin: 0 auto;
+}
+
+.item-image {
+  width: 100%;
+}
+
 /* MARK: CATEGORY */
 
 .category-header {
@@ -70,7 +86,6 @@ a {
   font-size: 2rem;
   height: 2em;
 
-  text-transform: capitalize;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -87,6 +102,13 @@ a {
   flex-wrap: wrap;
 }
 
-.item-image {
-  width: 25vw;
+.item-list__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.item-list__item-image {
+  width: 20vw;
+  margin: 0 2.5vw;
 }
