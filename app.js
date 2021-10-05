@@ -5,6 +5,7 @@ require('dotenv').config();
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require("passport-local").Strategy;
+const bcrypt = require("bcryptjs")
 const User = require('./models/user')
 
 
@@ -75,19 +76,25 @@ app.get('/signup', (req, res) => { res.render('sign-up')})
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-
-  User.findOne({ username: username }, function (err, user) {
-    if (err) { return done(err); }
-    if (!user) {
-        return done(null, false, { message: 'Incorrect username.' });
-      }
-      if (user.password != password) {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-      console.log('LOGIN3')
-      return done(null, user);
-    });
-  }
+    User.findOne({ username: username }, function (err, user) {
+      if (err) { return done(err); }
+      if (!user) {
+          return done(null, false, { message: 'Incorrect username.' });
+        }
+        bcrypt.compare(password, user.password, (err, res) => {
+          if (res) {
+            return done(null, user)
+          } else {
+            return done(null, false, { message: 'Incorrect password.' });
+          }
+        })
+        // if (user.password != password) {
+        //   return done(null, false, { message: 'Incorrect password.' });
+        // }
+        console.log('LOGIN3')
+        // return done(null, user);
+      });
+    }
 ));
 
 passport.serializeUser(function(user, done) {
@@ -110,13 +117,17 @@ console.log('LOGIN')
     res.redirect('/');
   });
 
-app.post('/sign-up', function(req, res) {
-  new User({
-    username: req.body.username,
-    password: req.body.password
-  }).save(function(err) {
+app.post('/signup', function(req, res) {
+  console.log("bcrypt: ", bcrypt)
+  bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
     if (err) done(err)
-    res.redirect('/')
+    new User({
+      username: req.body.username,
+      password: hashedPassword
+    }).save(function(err) {
+      if (err) done(err)
+      res.redirect('/')
+    })
   })
 })
 
