@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
+const { body, validationResult } = require('express-validator')
+
 require('dotenv').config();
+
 
 // PASSPORT
 const session = require('express-session');
@@ -67,10 +70,14 @@ app.use(function(req, res, next) {
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/fetch', fetchRouter); //A supprimer à un moment donné
+app.use('/fetch', fetchRouter); //TODO: A supprimer à un moment donné
 app.use('/brand', brandRouter);
 app.use('/item', itemRouter);
-app.get('/login', (req, res) => { res.render('log-in')})
+app.get('/login', (req, res) => {
+  const message = req.session.message
+  req.session.message = null
+  res.render('log-in', { message: message })
+})
 app.get('/signup', (req, res) => { res.render('sign-up')})
 
 

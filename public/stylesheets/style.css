@@ -112,3 +112,19 @@ a {
   width: 20vw;
   margin: 0 2.5vw;
 }
+
+/* MARK: FORM */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  margin: 10vh auto 0;
+  height: 50vh;
+  width: max-content;
+}
+
+.form label { /* TODO: A changer */
+  margin: 0 5% 0 0;
+}

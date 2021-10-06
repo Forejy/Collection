@@ -23,6 +23,7 @@
     "express-session": "*",
     "passport": "*",
     "passport-local": "*",
-    "bcryptjs": "*"
+    "bcryptjs": "*",
+    "express-validator": "*"
   }
 }

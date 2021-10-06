@@ -1,5 +1,18 @@
 const Item = require("../models/item")
 
+const createItem = (obj, currentUser, done) => {
+  //TODO: tester d'envoyer un objet à Item
+  console.log("CREATE ITEM: ", obj)
+  console.log("CURRENT USER: ", currentUser)
+  const item = new Item({ ...obj, user_id: currentUser.id })
+  console.log("item: ", item);
+
+  item.save(function(err, item) {
+    console.log(item)
+    done(null)
+  })
+}
+
 const findItem = (id, done) => {
   console.log("ID: ", id)
   Item.findOne({ _id: id }, function(err, item) {
@@ -42,10 +55,10 @@ const findTenItems = async (done) => {
     }}
   ])
 
-  console.log(arrObj)
   done(null, arrObj)
 }
 
+exports.createItem = createItem
 exports.findItem = findItem
 exports.findItemsByBrand = findItemByBrand
 exports.findTenItems = findTenItems
