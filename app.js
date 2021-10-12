@@ -193,7 +193,22 @@ app.use(function(err, req, res, next) {
 });
 
 
+const https = require("https")
+const fs = require("fs")
 
+const url = "https://images.pokemontcg.io/sm9/1_hires.png"
+
+https.get(url, (res) => {
+  const path = "download/poke1.png"
+  const writeStream = fs.createWriteStream(path)
+
+  res.pipe(writeStream)
+
+  writeStream.on("finish", () => {
+    writeStream.close()
+    console.log("Download Completed")
+  })
+})
 
 
 
