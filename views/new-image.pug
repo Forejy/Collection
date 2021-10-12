@@ -1,0 +1,17 @@
+extends layout
+
+block body
+  section
+    if errors
+      h2 Errors
+      each error in errors
+        div
+          span=error.param + ": "
+          span=error.msg
+  form(action="/item/new/image" method="POST" enctype="multipart/form-data")
+    ul.form
+      li
+        label(for="upload")
+        input(type="file" id="upload" name="upload" accept="image/png, image/jpeg")
+      button Upload Image
+  img(src="/new/image/8c5a9f2b50ba6fd03c39a4c60e21fbcb.jpg")

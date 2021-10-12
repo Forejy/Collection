@@ -1,13 +1,13 @@
 extends layout
 
 block body
-  section
-    if errors
-      h2 Errors
-      each error in errors
-        div
-          span=error.param + ": "
-          span=error.msg
+  //- section
+  //-   if errors
+  //-     h2 Errors
+  //-     each error in errors
+  //-       div
+  //-         span=error.param + ": "
+  //-         span=error.msg
   form(action="/item/new" method="POST")
     ul.form
       li
@@ -47,3 +47,4 @@ block body
           each condition in conditions
             option(value=condition selected)= condition
       button Create Item
+      div Next Step : Add Image

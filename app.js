@@ -11,13 +11,24 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcryptjs")
 const User = require('./models/user')
 
-
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const connectLivereload = require("connect-livereload");
+
+// S. Storage
+const bodyParser = require('body-parser')
+const Grid = require('gridfs-stream')
+const methodOverride = require('method-override')
+const upload = require('./storage')
+
+
+
+
+
+
 
 var app = express();
 
@@ -38,8 +49,30 @@ liveReloadServer.server.once("connection", () => {
 app.use(connectLivereload());
 
 // live-server>>
+const mongoURI = process.env.MONGO_URI
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(mongoURI)
+const conn = mongoose.connection
+
+
+
+
+
+//S. Storage - Middleware
+app.use(bodyParser.json())
+app.use(methodOverride('_method'))
+
+  let gfstream;
+
+conn.once('open', () => {
+  // Init stream
+  gfstream = Grid(conn.db, mongoose.mongo); // j'établis un stream avec la db, et avec un intermédiaire étant mongoose
+  gfstream.collection('images') //j'ai le stream qui appelle une collection
+})
+
+
+
+
 
 
 const indexRouter = require('./routes/index');
@@ -72,6 +105,10 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/fetch', fetchRouter); //TODO: A supprimer à un moment donné
 app.use('/brand', brandRouter);
+app.use('/item/image', (req, res, next) => {
+  res.locals.gfstream = gfstream
+  next()
+})
 app.use('/item', itemRouter);
 app.get('/login', (req, res) => {
   const message = req.session.message
@@ -79,6 +116,7 @@ app.get('/login', (req, res) => {
   res.render('log-in', { message: message })
 })
 app.get('/signup', (req, res) => { res.render('sign-up')})
+app.get('/image/new', (req, res) => { res.render('new-image')})
 
 
 passport.use(new LocalStrategy(
@@ -119,7 +157,7 @@ passport.deserializeUser(function(id, done) {
 app.post('/login',
 passport.authenticate('local', { failureRedirect: '/login' }),
   function(req, res) {
-console.log('LOGIN')
+    console.log('LOGIN')
 
     res.redirect('/');
   });
@@ -153,6 +191,11 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+
+
+
 
 
 module.exports = app;

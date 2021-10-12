@@ -1,15 +1,14 @@
 const Item = require("../models/item")
 
-const createItem = (obj, currentUser, done) => {
+const createItem = (obj, image, currentUser, done) => {
   //TODO: tester d'envoyer un objet à Item
   console.log("CREATE ITEM: ", obj)
-  console.log("CURRENT USER: ", currentUser)
-  const item = new Item({ ...obj, user_id: currentUser.id })
+  const item = new Item({ ...obj,  image: image, user_id: currentUser.id })
   console.log("item: ", item);
 
   item.save(function(err, item) {
     console.log(item)
-    done(null)
+    done(null, item._id)
   })
 }
 

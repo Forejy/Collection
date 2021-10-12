@@ -24,6 +24,11 @@
     "passport": "*",
     "passport-local": "*",
     "bcryptjs": "*",
-    "express-validator": "*"
+    "express-validator": "*",
+    "multer": "*",
+    "multer-gridfs-storage": "*",
+    "method-override": "*",
+    "gridfs-stream": "*",
+    "body-parser": "*"
   }
 }

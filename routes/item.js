@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { findItem, createItem } = require('../controllers/ItemController');
 const { body, isAlphanumeric, validationResult } = require('express-validator')
+const Item = require('../models/item')
 
 const brands = ["Pokemon", "Magic", "Yugioh"]
 const categories = ["Cards"]
@@ -32,20 +33,22 @@ const StringEachBelongsTo = (str) => {
   }
 }
 
+const upload = require('../storage')
+
 router.post("/new",
-  body('name').isAlphanumeric('en-US'),
-  body('edition').custom(value => {
-    var i = value.length
-    while (i--) {
-      if (!value.charAt(i).match(/[a-zA-Z0-9- #&]/))
-      {
-        throw new Error('Illegal Characters : only a-Z, 0-9. -#& and \' \'')
-      } else {
-        return true
-      }
+body('name').isAlphanumeric('en-US'),
+body('edition').custom(value => {
+  var i = value.length
+  while (i--) {
+    if (!value.charAt(i).match(/[a-zA-Z0-9- #&]/))
+    {
+      throw new Error('Illegal Characters : only a-Z, 0-9. -#& and \' \'')
+    } else {
+      return true
     }
-  }),
-  (req, res, next) => {
+  }
+}),
+(req, res, next) => {
     console.log("MDW APRES POST : /NEW")
     // Extract the validation errors from a request.
     const errors = validationResult(req)
@@ -56,24 +59,37 @@ router.post("/new",
         console.log(errors.array())
         res.render("new-item", { errors: errors.array(), ...fields })
     } else {
-      // function(req, res, next) {
-        console.log("req.body: ", req.body)
-        createItem(req.body, res.locals.currentUser, function(err, item) {
-          console.log(item)
-        })
-        res.redirect("/")
-        // Data from form is valid.
+      // Data from form is valid.
+      // Go to 2nd part of the form
+        req.session.item = req.body
+        res.redirect("/item/new/image")
     }
   })
 
-// router.post("/new",
-// function(req, res, next) {
-//   console.log(req.body)
-//   createItem("test", function(err, item) {
-//     console.log(item)
-//   })
-//   res.redirect("/")
-// })
+router.get("/new/image", (req, res) => {
+  res.render('new-image')
+})
+
+router.post("/new/image", upload.single('upload'), (req, res) => {
+  console.log("req.session.item: ", req.session.item)
+  console.log("req.file: ", req.file)
+
+  // Handle any error
+  uploaded(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      res.render("new-image", { error: err })
+    } else if (err) {
+      res.render("new-image", { error: err })
+    }
+  })
+
+  // Create Item
+  createItem(req.session.item, req.file.filename, res.locals.currentUser, (err, id) => {
+    if (err) { res.render("new-image", { error: err }) }
+    res.session.item = null;
+    res.redirect('/item/' + id)
+  })
+})
 
 router.get("/:id", function(req, res, next) {
   let { id } = req.params
@@ -86,6 +102,14 @@ router.get("/:id", function(req, res, next) {
   })
 })
 
+router.get('/image/:name', (req, res) => {
+  const gfstream = res.locals.gfstream
+  gfstream.files.findOne({ filename: req.params.name }, (err, file) => {
+   const readstream = gfstream.createReadStream({ _id: file._id })
+   return readstream.pipe(res)
+   console.log(readstream)
+  })
+})
 
 
 module.exports = router;

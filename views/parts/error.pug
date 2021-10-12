@@ -1,0 +1,10 @@
+if errors
+  section
+    h2 Errors
+    each error in errors
+      div
+        span=error.param + ": "
+        span=error.msg
+if error
+  section
+    h2="Error: " +  error.status + error.message
