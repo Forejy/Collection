@@ -1,9 +1,11 @@
-extends layout
+extends ./parts/layout
 
 block body
   section TEST login
     if currentUser
-      div #{currentUser.username}
+      div #{ currentUser.username }
+    if info
+      div #{ info.message }
   each package in packages
     section
       header.category-header
@@ -13,5 +15,8 @@ block body
         each item in package.item
           article.item-list__item
             a(href="./item/" + item._id)
-              img(class="item-list__item-image" src=item.image)
+              img(class="item-list__item-image" src="/item/image/" + item.image)
             div=item.price
+            div
+              a(href="/add-to-cart/" + item._id) ADD
+              a(href="/remove-from-cart/" + item._id) Remove

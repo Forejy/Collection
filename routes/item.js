@@ -9,6 +9,9 @@ const brands = ["Pokemon", "Magic", "Yugioh"]
 const categories = ["Cards"]
 const conditions = ["Mint", "Near Mint", "Excellent", "Good", "Light Played", "Played", "Poor"]
 const fields = { categories: categories, brands: brands, conditions: conditions }
+const upload = require('../storage')
+const multer = require('multer')
+
 
 router.get('/new', function(req, res, next) {
   if (res.locals.currentUser !== undefined)
@@ -33,7 +36,6 @@ const StringEachBelongsTo = (str) => {
   }
 }
 
-const upload = require('../storage')
 
 router.post("/new",
 body('name').isAlphanumeric('en-US'),
@@ -70,20 +72,22 @@ router.get("/new/image", (req, res) => {
   res.render('new-image')
 })
 
-router.post("/new/image", upload.single('upload'), (req, res) => {
+router.post("/new/image", (req, res) => {
   console.log("req.session.item: ", req.session.item)
   console.log("req.file: ", req.file)
 
   // Handle any error
-  uploaded(req, res, (err) => {
+  upload.single('upload')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       res.render("new-image", { error: err })
     } else if (err) {
       res.render("new-image", { error: err })
+    } else {
+      res.redirect("/item//new/image")
     }
   })
 
-  // Create Item
+  // Create Item w/ the filename of the image
   createItem(req.session.item, req.file.filename, res.locals.currentUser, (err, id) => {
     if (err) { res.render("new-image", { error: err }) }
     res.session.item = null;
@@ -91,12 +95,32 @@ router.post("/new/image", upload.single('upload'), (req, res) => {
   })
 })
 
-router.get("/:id", function(req, res, next) {
+router.get('/all', (req, res) => {
+  Item.find({}, (err, items) => {
+    if (err) { console.log(err) }
+    res.render('items', { name: "All Items", items: items })
+  })
+})
+
+router.get('/all/resetdb', (req, res) => {
+  // Item.find({}, )
+  // const { fetchPokemonCards, fetchMagicCards, fetchYugiohCards } = require("../myApp")
+  // Item.deleteMany({}, (err) => {
+  //   if (err) { console.log(err) }
+  // })
+  // fetchPokemonCards()
+  // fetchMagicCards()
+  // fetchYugiohCards()
+  // res.redirect('/')
+})
+
+
+router.get("/:id", function(req, res) {
   let { id } = req.params
 
   findItem(id, function(err, item) {
     //TODO: ça plante ici pour une unhandled error
-    if (err) done(err)
+    if (err) { console.log("ERROR: ", err) }
     console.log(item)
     res.render('item', { item: item })
   })
@@ -105,11 +129,12 @@ router.get("/:id", function(req, res, next) {
 router.get('/image/:name', (req, res) => {
   const gfstream = res.locals.gfstream
   gfstream.files.findOne({ filename: req.params.name }, (err, file) => {
-   const readstream = gfstream.createReadStream({ _id: file._id })
-   return readstream.pipe(res)
-   console.log(readstream)
+    if (err) { console.log("ERROR: ", err) }
+    const readstream = gfstream.createReadStream({ _id: file._id })
+    return readstream.pipe(res)
   })
 })
+
 
 
 module.exports = router;

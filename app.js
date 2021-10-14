@@ -6,6 +6,8 @@ require('dotenv').config();
 
 // PASSPORT
 const session = require('express-session');
+const MongoStore = require('connect-mongo')
+
 const passport = require('passport');
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcryptjs")
@@ -17,6 +19,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const connectLivereload = require("connect-livereload");
+const flash = require("connect-flash")
 
 // S. Storage
 const bodyParser = require('body-parser')
@@ -58,6 +61,8 @@ const conn = mongoose.connection
 
 
 
+
+
 //S. Storage - Middleware
 app.use(bodyParser.json())
 app.use(methodOverride('_method'))
@@ -76,7 +81,7 @@ conn.once('open', () => {
 
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const userRouter = require('./routes/user');
 const fetchRouter = require('./routes/fetch');
 const brandRouter = require('./routes/brand');
 const itemRouter = require('./routes/item');
@@ -92,30 +97,51 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'keyboard cat' }));
+app.use(session({
+  secret: 'keyboard cat',
+  store: MongoStore.create({
+    mongoUrl: mongoURI
+   }),
+  cookie: { maxAge: 180 * 60 * 1000 }
+}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash())
 
 app.use(function(req, res, next) {
-  res.locals.currentUser = req.user;
+  res.locals.currentUser = req.user
+  res.locals.session = req.session
   next();
 })
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/user', userRouter);
 app.use('/fetch', fetchRouter); //TODO: A supprimer à un moment donné
 app.use('/brand', brandRouter);
-app.use('/item/image', (req, res, next) => {
+app.use('/item', (req, res, next) => {
   res.locals.gfstream = gfstream
   next()
 })
+// TODO: /item/image
 app.use('/item', itemRouter);
+
 app.get('/login', (req, res) => {
-  const message = req.session.message
-  req.session.message = null
-  res.render('log-in', { message: message })
+  console.log(res.locals.currentUser)
+  if (res.locals.currentUser === undefined) {
+    const message = req.session.message
+    req.session.message = null
+    res.render('log-in', { message: message })
+  } else {
+    res.redirect('/')
+  }
 })
-app.get('/signup', (req, res) => { res.render('sign-up')})
+app.get('/signup', (req, res) => {
+  if (res.locals.currentuser === undefined) {
+    res.render('sign-up')
+  } else {
+    res.redirect('/')
+  }
+})
 app.get('/image/new', (req, res) => { res.render('new-image')})
 
 
@@ -189,26 +215,11 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('parts/error');
 });
 
 
-const https = require("https")
-const fs = require("fs")
 
-const url = "https://images.pokemontcg.io/sm9/1_hires.png"
-
-https.get(url, (res) => {
-  const path = "download/poke1.png"
-  const writeStream = fs.createWriteStream(path)
-
-  res.pipe(writeStream)
-
-  writeStream.on("finish", () => {
-    writeStream.close()
-    console.log("Download Completed")
-  })
-})
 
 
 

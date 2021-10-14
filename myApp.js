@@ -24,7 +24,7 @@ const createManyItems = (done, objArray) => {
   console.log("objArray: ", objArray)
   Item.create(objArray, function(err, items) {
     if (err) return done(err)
-    done(null, items)
+    // done(null, items)
   })
 }
 
@@ -53,8 +53,8 @@ const fetchPokemonCards = async (done) => { //TODO: View
     objArray = data.map(elem => new Item({
       name: elem.name,
       image: elem.images.large,
-      brand: "?",
-      category: "?",
+      brand: "Pokemon",
+      category: "Card",
       edition: elem.set.series + " - " + elem.set.name,
       additional: "",
       price: elem.cardmarket.prices.averageSellPrice,
@@ -94,11 +94,11 @@ const fetchMagicCards = async (done) => {
     done(err)
   }
 
-  // createManyItems(done, objArray)
-  Item.find({}, function (err, items) {
-    if (err) return done(err)
-    done(null, items)
-  })
+  createManyItems(done, objArray)
+  // Item.find({}, function (err, items) {
+  //   if (err) return done(err)
+  //   done(null, items)
+  // })
 
 }
 
@@ -130,7 +130,7 @@ const fetchYugiohCards = async (done) => {
 
 
   // done(null, objArray)
-  // createManyItems(done, objArray)
+  createManyItems(done, objArray)
   // Item.find({ }, function (err, items) {
   //   if (err) return done(err)
   //   done(null, items)

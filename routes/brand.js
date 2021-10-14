@@ -9,7 +9,7 @@ router.get("/:name", function(req, res, next) {
 
   findItemsByBrand(brand, function(err, items) {
     if (err) done(err)
-    res.render('brand', { name: brand, items: items })
+    res.render('items', { name: brand, items: items })
   })
 })
 

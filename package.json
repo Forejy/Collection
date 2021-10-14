@@ -29,6 +29,9 @@
     "multer-gridfs-storage": "*",
     "method-override": "*",
     "gridfs-stream": "*",
-    "body-parser": "*"
+    "body-parser": "*",
+    "phin": "*",
+    "connect-mongo": "*",
+    "connect-flash": "*"
   }
 }

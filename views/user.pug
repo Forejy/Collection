@@ -1,18 +1,16 @@
-extends layout
+extends ./parts/layout
 
 block body
   section
     header.category-header
-      h1= name
+      h1= username
     section.item-list
       each item in items
         article.item-list__item
           div= item.name
           div= item.edition
           a(href='../item/' + item._id )
-            img(class="item-list__item-image" src= item.image)
+            img(class="item-list__item-image" src="/item/image/" + item.image)
           div Price: #{item.price}
           div Stock: #{item.stock}
           div Condition: #{item.condition}
-          div Shop: #{item.user_id}
-

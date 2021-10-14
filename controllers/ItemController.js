@@ -13,10 +13,7 @@ const createItem = (obj, image, currentUser, done) => {
 }
 
 const findItem = (id, done) => {
-  console.log("ID: ", id)
   Item.findOne({ _id: id }, function(err, item) {
-    console.log(item)
-
     if (err) done(err)
     done(null, item)
   })

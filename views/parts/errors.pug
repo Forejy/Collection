@@ -1,0 +1,12 @@
+if errors
+  section
+    h2 Errors
+    each error in errors
+      div
+        span=error.param + ": "
+        span=error.msg
+if messages && messages.length > 0
+  section
+    h2 Flash Messages
+    each message in messages
+      div=message

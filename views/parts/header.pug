@@ -5,5 +5,15 @@ header
         a(href="/") ACCUEIL
       li
         a(href="/item/new") ADD ITEM
+      if currentUser
+        li
+          a(href="/signout") Sign Out
+      else
+        li
+          ul
+            li
+              a(href="/signup") Sign Up
+            li
+              a(href="/login") Login
       li
         a CATEGORY
