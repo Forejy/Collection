@@ -1,0 +1,14 @@
+extends ./parts/layout
+
+block body
+  each cartItem in cartItems
+    div= cartItem.item.name
+    a(href='../item/' + cartItem.item._id )
+      img(class="item-list__item-image" src="/item/image/" + cartItem.item.image)
+    div="quantity in cart: " + cartItem.qty
+    div="total price: " + cartItem.price
+    div
+      a(href="/cart/add-to-cart/" + cartItem.item._id) +
+      a(href="/cart/remove-one-from-cart/" + cartItem.item._id) -
+      a(href="/cart/remove-from-cart/" + cartItem.item._id) remove
+

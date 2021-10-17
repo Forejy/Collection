@@ -85,6 +85,7 @@ const userRouter = require('./routes/user');
 const fetchRouter = require('./routes/fetch');
 const brandRouter = require('./routes/brand');
 const itemRouter = require('./routes/item');
+const cartRouter = require('./routes/cart');
 const { isRedirect } = require('node-fetch');
 
 
@@ -124,6 +125,7 @@ app.use('/item', (req, res, next) => {
 })
 // TODO: /item/image
 app.use('/item', itemRouter);
+app.use('/cart', cartRouter);
 
 app.get('/login', (req, res) => {
   console.log(res.locals.currentUser)

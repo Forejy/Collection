@@ -18,5 +18,5 @@ block body
               img(class="item-list__item-image" src="/item/image/" + item.image)
             div=item.price
             div
-              a(href="/add-to-cart/" + item._id) ADD
-              a(href="/remove-from-cart/" + item._id) Remove
+              a(href="/cart/add-to-cart/" + item._id) ADD
+              a(href="/cart/remove-from-cart/" + item._id) Remove

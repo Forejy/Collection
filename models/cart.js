@@ -1,6 +1,8 @@
+const isEmptyObject = require('../helpers/jsmethods')
+
 function Cart (oldCart) {
-  this.items = oldCart.items
-  this.totalQty = oldCart.totalQty
+  this.items = oldCart.items || {}
+  this.totalQty = oldCart.totalQty || 0
 
   this.add = (item, id) => {
     let storedItem = this.items[id]
@@ -18,7 +20,7 @@ function Cart (oldCart) {
     }
   }
 
-  this.remove = (id) => {
+  this.removeOne = (id) => {
     const storedItem = this.items[id]
     if (storedItem) {
       if (storedItem.qty === 1) {
@@ -32,6 +34,17 @@ function Cart (oldCart) {
     }
   }
 
+  this.remove = (id) => {
+    // Remove the item from the cart, remove field method ?
+    if ()
+    delete this.items[id]
+  }
+
+  this.empty = () => {
+    this.items = {}
+    this.totalQty = 0
+  }
+
   this.generateArray = () => {
     let arr = []
     for (let id in this.items) {
@@ -41,8 +54,12 @@ function Cart (oldCart) {
   }
 
   this.totalPrice = () => {
-    const priceArr = Object.values(this.items).map(elem => elem.price)
-    return priceArr.reduce((a, b) => a + b )
+    if (isEmptyObject(this.items)) {
+      return 0
+    } else {
+      const priceArr = Object.values(this.items).map(elem => elem.price)
+      return priceArr.reduce((a, b) => a + b )
+    }
   }
 }
 
