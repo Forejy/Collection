@@ -35,8 +35,7 @@ function Cart (oldCart) {
   }
 
   this.remove = (id) => {
-    // Remove the item from the cart, remove field method ?
-    if ()
+    // Impossible qu'en front on call un remove sans qu'il y ait l'item présent dans le cart (mais peut-etre que je devrais quand meme protéger le back-end)
     delete this.items[id]
   }
 
