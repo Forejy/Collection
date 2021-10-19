@@ -16,10 +16,16 @@ router.get('/add-to-cart/:id', (req, res) => {
 
   Item.findById(itemId, (err, item) => {
     if (err) {
-      return res.redirect('/', { error: err })
+      return res.redirect('/', { error: err }) //TODO: Utiliser flash
     }
     const errors = cart.add(item, item.id)
-    if (errors === undefined) { req.session.cart = cart; }
+    if (errors === undefined) {
+      console.log(item)
+      console.log(cart)
+      req.session.cart = cart;
+      console.log(req.session.cart)
+
+    }
     req.flash('info', errors)
     res.redirect('/')
   })

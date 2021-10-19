@@ -138,7 +138,7 @@ app.get('/login', (req, res) => {
   }
 })
 app.get('/signup', (req, res) => {
-  if (res.locals.currentuser === undefined) {
+  if (res.locals.currentUser === undefined) {
     res.render('sign-up')
   } else {
     res.redirect('/')
