@@ -2,12 +2,14 @@ header
   nav
     ul.header
       li
-        a(href="/") ACCUEIL
+        a(href="/") HOME
       li
         a(href="/item/new") ADD ITEM
       if currentUser
         li
           a(href="/signout") Sign Out
+        li
+          a(href="/cart/show") Cart
       else
         li
           ul

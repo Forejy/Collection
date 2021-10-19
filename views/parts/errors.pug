@@ -5,8 +5,15 @@ if errors
       div
         span=error.param + ": "
         span=error.msg
-if messages && messages.length > 0
+if flash
+
+if infos && infos.length > 0
   section
-    h2 Flash Messages
-    each message in messages
-      div=message
+    h2 Flash Info
+    each info in infos
+      div=info
+if successes && successes.length > 0
+  section
+    h2 Flash Success
+    each success in successes
+      div=success

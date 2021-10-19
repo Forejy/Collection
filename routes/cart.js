@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const methodOverride = require('method-override')
 const Cart = require('../models/cart').Cart
 const Item = require('../models/item')
 
 router.get('/show', (req, res) => {
-  console.log(req.session.cart)
-  const cartItems = req.session.cart.items
-  res.render('cart', { cartItems: cartItems })
+  const cartItems = req.session.cart ? req.session.cart.items : null
+  const successes = req.flash('success')
+  res.render('cart', { cartItems: cartItems, successes: successes })
 })
 
 router.get('/add-to-cart/:id', (req, res) => {
@@ -32,6 +33,12 @@ router.get('/remove-one-from-cart/:id', (req, res) => {
     req.session.cart = cart
   }
   res.redirect('/')
+})
+
+router.delete('/', (req, res) => {
+  delete req.session.cart
+  req.flash('success', 'Cart cleared')
+  res.redirect('/cart/show')
 })
 
 

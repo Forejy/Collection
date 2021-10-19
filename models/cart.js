@@ -39,11 +39,6 @@ function Cart (oldCart) {
     delete this.items[id]
   }
 
-  this.empty = () => {
-    this.items = {}
-    this.totalQty = 0
-  }
-
   this.generateArray = () => {
     let arr = []
     for (let id in this.items) {
