@@ -1,6 +1,9 @@
 extends ./parts/layout
 
 block body
+  script(src="https://js.stripe.com/v3/")
+  script(src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch")
+
   section
     if cartItems
       each cartItem in cartItems
@@ -14,8 +17,10 @@ block body
           a(href="/cart/remove-one-from-cart/" + cartItem.item._id) -
           a(href="/cart/remove-from-cart/" + cartItem.item._id) remove
       div
-      form(method="Post" action="/cart?_method=DELETE")
-        button(type="submit") Empty the cart
+        form(method="Post" action="/cart?_method=DELETE")
+          button(type="submit") Empty the cart
+        form(action="/stripe/create-checkout-session" method="POST")
+          button(type="submit") Checkout
     else
       div My cart is empty
 

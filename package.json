@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "export NODE_ENV=development && node ./bin/www",
     "watch": "nodemon --ext js,pug --ignore public"
   },
   "dependencies": {
@@ -32,6 +32,7 @@
     "body-parser": "*",
     "phin": "*",
     "connect-mongo": "*",
-    "connect-flash": "*"
+    "connect-flash": "*",
+    "stripe": "*"
   }
 }

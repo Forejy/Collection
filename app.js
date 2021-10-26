@@ -1,7 +1,30 @@
 const mongoose = require('mongoose');
 const { body, validationResult } = require('express-validator')
 
-require('dotenv').config();
+if (process.env.NODE_ENV === 'development') {
+  require('dotenv').config();
+}
+
+//STRIPE
+const stripePublicKey = process.env.STRIPE_PUBLIC_KEY
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+
+const stripe = require('stripe')(
+  'sk_test_51JmGhYGQO5hF0ENvCYAYMXYmNjuK1dBaKJrtDDV0R5NVlnB43AdQOiuZLBqBdGbrtDuC5plOQeJ51t3Ad8kxCF3p00hB3EE4JA'
+  );
+
+  const paymentIntent = stripe.paymentIntents.create({
+    amount: 500,
+    currency: 'eur',
+    payment_method_types: ['card'],
+    receipt_email: 'jenny.rosen@example.com',
+  })
+
+  paymentIntent.then(value => {
+    console.log(value)
+  })
+
+
 
 
 // PASSPORT
@@ -86,6 +109,7 @@ const fetchRouter = require('./routes/fetch');
 const brandRouter = require('./routes/brand');
 const itemRouter = require('./routes/item');
 const cartRouter = require('./routes/cart');
+const stripeRouter = require('./routes/stripe');
 const { isRedirect } = require('node-fetch');
 
 
@@ -126,6 +150,7 @@ app.use('/item', (req, res, next) => {
 // TODO: /item/image
 app.use('/item', itemRouter);
 app.use('/cart', cartRouter);
+app.use('/stripe', stripeRouter)
 
 app.get('/login', (req, res) => {
   console.log(res.locals.currentUser)
@@ -145,6 +170,7 @@ app.get('/signup', (req, res) => {
   }
 })
 app.get('/image/new', (req, res) => { res.render('new-image')})
+
 
 
 passport.use(new LocalStrategy(
