@@ -5,9 +5,21 @@ const Cart = require('../models/cart').Cart
 const Item = require('../models/item')
 
 router.get('/show', (req, res) => {
-  const cartItems = req.session.cart ? req.session.cart.items : null
+  console.log(req.session.cart)//TODO: test avec un cart supprimé de la db
+  let cart
+  let cartItems
+  let totalPrice
+  if (req.session.cart) {
+    cart = req.session.cart
+    cartItems = cart.items
+    totalPrice = cart.totalPrice
+  } else {
+    cartItems = null
+    totalPrice = null
+  }
+
   const successes = req.flash('success')
-  res.render('cart', { cartItems: cartItems, successes: successes })
+  res.render('cart', { cartItems: cartItems, successes: successes, totalPrice: totalPrice })
 })
 
 router.get('/add-to-cart/:id', (req, res) => {

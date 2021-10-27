@@ -20,7 +20,7 @@ router.get('/new', function(req, res, next) {
   } else {
     console.log(req.session.message)
     req.session.message = 'You must be connected to add a new item'
-    res.redirect('/login')
+    res.redirect('/user/login')
   }
 })
 

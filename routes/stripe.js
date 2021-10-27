@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { isLoggedIn } = require('../helpers/login')
+
 if (process.env.NODE_ENV === 'development') {
   require('dotenv').config();
 }
@@ -9,13 +11,8 @@ const stripe = require('stripe')(
 const stripePublicKey = process.env.STRIPE_PUBLIC_KEY
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 
-router.get('/', (req, res) => {
-  console.log('stripe')
-  res.render('stripe')
-})
-
-router.post('/create-checkout-session', async (req, res) => {
-	console.log('/create-checkout-session')
+router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
+	const cartTotalPrice = req.session.cart.totalPrice * 100
 	const session = await stripe.checkout.sessions.create({
 		payment_method_types: ['card'],
 		line_items: [
@@ -23,9 +20,9 @@ router.post('/create-checkout-session', async (req, res) => {
 				price_data: {
 					currency: 'usd',
 					product_data: {
-						name: 'T-shirt',
-					},
-					unit_amount: 2000,
+            name: 'T-shirt',
+          },
+					unit_amount: cartTotalPrice,
 				},
 				quantity: 1,
 			},
@@ -36,6 +33,11 @@ router.post('/create-checkout-session', async (req, res) => {
 	})
 
 	res.redirect(303, session.url)
+})
+
+router.get('/successful-payment', isLoggedIn, (req, res) => {
+
+	res.render('stripe/successful-payment')
 })
 
 module.exports = router

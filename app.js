@@ -9,20 +9,20 @@ if (process.env.NODE_ENV === 'development') {
 const stripePublicKey = process.env.STRIPE_PUBLIC_KEY
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 
-const stripe = require('stripe')(
-  'sk_test_51JmGhYGQO5hF0ENvCYAYMXYmNjuK1dBaKJrtDDV0R5NVlnB43AdQOiuZLBqBdGbrtDuC5plOQeJ51t3Ad8kxCF3p00hB3EE4JA'
-  );
+// const stripe = require('stripe')(
+//   'sk_test_51JmGhYGQO5hF0ENvCYAYMXYmNjuK1dBaKJrtDDV0R5NVlnB43AdQOiuZLBqBdGbrtDuC5plOQeJ51t3Ad8kxCF3p00hB3EE4JA'
+//   );
 
-  const paymentIntent = stripe.paymentIntents.create({
-    amount: 500,
-    currency: 'eur',
-    payment_method_types: ['card'],
-    receipt_email: 'jenny.rosen@example.com',
-  })
+  // const paymentIntent = stripe.paymentIntents.create({
+  //   amount: 500,
+  //   currency: 'eur',
+  //   payment_method_types: ['card'],
+  //   receipt_email: 'jenny.rosen@example.com',
+  // })
 
-  paymentIntent.then(value => {
-    console.log(value)
-  })
+  // paymentIntent.then(value => {
+  //   console.log(value)
+  // })
 
 
 
@@ -64,15 +64,13 @@ const livereload = require("livereload");
 
 const liveReloadServer = livereload.createServer();
 liveReloadServer.watch(path.join(__dirname, 'public'));
-liveReloadServer.server.once("connection", () => {
-  setTimeout(() => {
-    liveReloadServer.refresh("/")
-  }, 100)
-})
-
-
-
 app.use(connectLivereload());
+// liveReloadServer.server.once("connection", () => {
+//   setTimeout(() => {
+//     liveReloadServer.refresh("/")
+//   }, 100)
+// })
+
 
 // live-server>>
 const mongoURI = process.env.MONGO_URI
@@ -133,7 +131,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash())
 
-app.use(function(req, res, next) {
+app.use(function(req, res, next) { //local currentUser & session
   res.locals.currentUser = req.user
   res.locals.session = req.session
   next();
@@ -152,23 +150,8 @@ app.use('/item', itemRouter);
 app.use('/cart', cartRouter);
 app.use('/stripe', stripeRouter)
 
-app.get('/login', (req, res) => {
-  console.log(res.locals.currentUser)
-  if (res.locals.currentUser === undefined) {
-    const message = req.session.message
-    req.session.message = null
-    res.render('log-in', { message: message })
-  } else {
-    res.redirect('/')
-  }
-})
-app.get('/signup', (req, res) => {
-  if (res.locals.currentUser === undefined) {
-    res.render('sign-up')
-  } else {
-    res.redirect('/')
-  }
-})
+
+
 app.get('/image/new', (req, res) => { res.render('new-image')})
 
 
@@ -187,11 +170,6 @@ passport.use(new LocalStrategy(
             return done(null, false, { message: 'Incorrect password.' });
           }
         })
-        // if (user.password != password) {
-        //   return done(null, false, { message: 'Incorrect password.' });
-        // }
-        console.log('LOGIN3')
-        // return done(null, user);
       });
     }
 ));
@@ -208,27 +186,8 @@ passport.deserializeUser(function(id, done) {
 
 
 
-app.post('/login',
-passport.authenticate('local', { failureRedirect: '/login' }),
-  function(req, res) {
-    console.log('LOGIN')
 
-    res.redirect('/');
-  });
 
-app.post('/signup', function(req, res) {
-  console.log("bcrypt: ", bcrypt)
-  bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
-    if (err) done(err)
-    new User({
-      username: req.body.username,
-      password: hashedPassword
-    }).save(function(err) {
-      if (err) done(err)
-      res.redirect('/')
-    })
-  })
-})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

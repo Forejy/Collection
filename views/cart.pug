@@ -19,6 +19,7 @@ block body
       div
         form(method="Post" action="/cart?_method=DELETE")
           button(type="submit") Empty the cart
+        div="Total Amount: " + totalPrice
         form(action="/stripe/create-checkout-session" method="POST")
           button(type="submit") Checkout
     else

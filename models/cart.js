@@ -3,6 +3,7 @@ const isEmptyObject = require('../helpers/jsmethods')
 function Cart (oldCart) {
   this.items = oldCart.items || {}
   this.totalQty = oldCart.totalQty || 0
+  this.totalPrice = oldCart.totalPrice || 0
 
   this.add = (item, id) => {
     let storedItem = this.items[id]
@@ -13,8 +14,9 @@ function Cart (oldCart) {
     }
     if (storedItem.qty < storedItem.item.stock) {
       storedItem.qty++
-      storedItem.price = storedItem.item.price * storedItem.qty
+      storedItem.price += storedItem.item.price
       this.totalQty++
+      this.totalPrice += storedItem.item.price
     } else {
       return ("This is the maximum we have in stock")
     }
@@ -23,19 +25,21 @@ function Cart (oldCart) {
   this.removeOne = (id) => {
     const storedItem = this.items[id]
     if (storedItem) {
+      this.totalPrice -= storedItem.item.price
+      this.totalQty -= 1
       if (storedItem.qty === 1) {
          delete this.items[id]
       } else {
         storedItem.qty -= 1
-        storedItem.price = storedItem.item.price * storedItem.qty
+        storedItem.price -= storedItem.item.price
         this.items[id] = storedItem
       }
-      this.totalQty -= 1
     }
   }
 
   this.remove = (id) => {
-    // Impossible qu'en front on call un remove sans qu'il y ait l'item présent dans le cart (mais peut-etre que je devrais quand meme protéger le back-end)
+    // Impossible qu'en front on call un remove sans qu'il y ait l'item présent dans le cart (mais peut-etre que je devrais quand meme protéger le back)
+    this.totalPrice -= this.items[id].price
     delete this.items[id]
   }
 
@@ -45,15 +49,6 @@ function Cart (oldCart) {
       arr.push(this.items[id])
     }
     return arr
-  }
-
-  this.totalPrice = () => {
-    if (isEmptyObject(this.items)) {
-      return 0
-    } else {
-      const priceArr = Object.values(this.items).map(elem => elem.price)
-      return priceArr.reduce((a, b) => a + b )
-    }
   }
 }
 
