@@ -40,7 +40,7 @@ passport.authenticate('local', { failureRedirect: '/login' }),
 		}
 });
 
-  router.post('/signup', isNotLoggedIn, (req, res) => {
+router.post('/signup', isNotLoggedIn, (req, res) => {
   console.log("bcrypt: ", bcrypt)
   bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
     if (err) done(err)
