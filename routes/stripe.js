@@ -32,7 +32,9 @@ router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
 		cancel_url: 'http://localhost:3000/'
 	})
 
+	console.log(session.url)
 	res.redirect(303, session.url)
+
 })
 
 router.get('/successful-payment', isLoggedIn, (req, res) => {
