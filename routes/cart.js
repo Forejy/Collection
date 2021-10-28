@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const methodOverride = require('method-override')
-const Cart = require('../models/cart').Cart
+const Cart = require('../models/cart')
 const Item = require('../models/item')
 
 router.get('/show', (req, res) => {
@@ -53,7 +53,7 @@ router.get('/remove-one-from-cart/:id', (req, res) => {
   res.redirect('/')
 })
 
-router.delete('/', (req, res) => {
+router.delete('/empty-card', (req, res) => {
   delete req.session.cart
   req.flash('success', 'Cart cleared')
   res.redirect('/cart/show')

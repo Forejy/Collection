@@ -16,7 +16,10 @@ function Cart (oldCart) {
       storedItem.qty++
       storedItem.price += storedItem.item.price
       this.totalQty++
-      this.totalPrice += storedItem.item.price
+      console.log("storedItem.item.price: ", storedItem.item.price)
+      console.log("totalPrice: ", this.totalPrice)
+      this.totalPrice = parseFloat((this.totalPrice + storedItem.item.price).toFixed(2))
+      console.log("totalPrice: ", this.totalPrice)
     } else {
       return ("This is the maximum we have in stock")
     }
@@ -52,4 +55,4 @@ function Cart (oldCart) {
   }
 }
 
-exports.Cart = Cart
+module.exports = Cart

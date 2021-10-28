@@ -28,17 +28,32 @@ router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
 			},
 		],
 		mode: 'payment',
-		success_url: 'http://localhost:3000/',
+		success_url: 'http://localhost:3000/stripe/successful-payment',
 		cancel_url: 'http://localhost:3000/'
 	})
 
-	console.log(session.url)
 	res.redirect(303, session.url)
-
 })
 
-router.get('/successful-payment', isLoggedIn, (req, res) => {
+router.get('/successful-payment', isLoggedIn, (req, res, next) => {
+	//Find and Update 'stock' en soustrayant le stock de cet item dans le cart
+	const Item = require('../models/item')
+	const Cart = require('../models/cart')
 
+	const cart = new Cart(req.session.cart)
+	const items = cart.generateArray();
+	items.forEach(item => {
+		const newStock = item.item.stock - item.qty
+		const id = item.item._id
+		Item.findByIdAndUpdate(id, { stock: newStock }, (err, item) => {
+			console.log(item)
+			if (err) {
+				next(err)
+			}
+		})
+	})
+
+	delete req.session.cart
 	res.render('stripe/successful-payment')
 })
 

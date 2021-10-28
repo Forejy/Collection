@@ -17,7 +17,7 @@ block body
           a(href="/cart/remove-one-from-cart/" + cartItem.item._id) -
           a(href="/cart/remove-from-cart/" + cartItem.item._id) remove
       div
-        form(method="Post" action="/cart?_method=DELETE")
+        form(method="Post" action="/cart/empty-card?_method=DELETE")
           button(type="submit") Empty the cart
         div="Total Amount: " + totalPrice
         form(action="/stripe/create-checkout-session" method="POST")
