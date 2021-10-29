@@ -54,10 +54,20 @@ router.post('/signup', isNotLoggedIn, (req, res) => {
   })
 })
 
+/* GET currentUser own account */
+router.get('/myaccount', isLoggedIn, (req, res, next) => {
+  const Order = require('../models/order')
+  const findOrdersByUser = require('../controllers/orderController').findOrdersByUser
+
+  const orders = findOrdersByUser(res.locals.currentUser._id, (err, ord) => {
+    console.log(orders)
+  })
+
+})
 
 /* GET user shop. */
 
-router.get('/:user_id', isLoggedIn, function(req, res, next) {
+router.get('/:user_id', isLoggedIn, (req, res, next) => {
   const user_id = req.params.user_id
 
   User.findOne({ _id: user_id }, (err, user) => {
@@ -65,11 +75,13 @@ router.get('/:user_id', isLoggedIn, function(req, res, next) {
 
     Item.find({ user_id: user_id }, (err, items) => {
       if (err) { console.log(err) }
-      res.render('user', { username: user.username, items: items })
+      res.render('user/user', { username: user.username, items: items })
     })
   })
 
 });
+
+
 
 
 

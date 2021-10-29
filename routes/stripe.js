@@ -39,9 +39,10 @@ router.get('/successful-payment', isLoggedIn, (req, res, next) => {
 	//Find and Update 'stock' en soustrayant le stock de cet item dans le cart
 	const Item = require('../models/item')
 	const Cart = require('../models/cart')
+	const createOrder = require('../controllers/orderController').createOrder
 
 	const cart = new Cart(req.session.cart)
-	const items = cart.generateArray();
+	let items = cart.generateArray();
 	items.forEach(item => {
 		const newStock = item.item.stock - item.qty
 		const id = item.item._id
@@ -52,6 +53,24 @@ router.get('/successful-payment', isLoggedIn, (req, res, next) => {
 			}
 		})
 	})
+
+	items = items.map((elem) => {
+		item = elem.item
+		return {
+			item: {
+				name: item.name,
+				brand: item.brand,
+				category: item.category,
+				edition: item.edition,
+				price: item.price,
+				condition: item.condition
+			},
+			qty: elem.qty,
+			price: elem.price
+		}})
+	const today = new Date(Date.now()).toDateString()
+	const user_id = res.locals.currentUser._id
+	createOrder(user_id, items, cart.totalPrice, today, next)
 
 	delete req.session.cart
 	res.render('stripe/successful-payment')

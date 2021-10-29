@@ -4,8 +4,8 @@ const methodOverride = require('method-override')
 const Cart = require('../models/cart')
 const Item = require('../models/item')
 
-router.get('/show', (req, res) => {
-  console.log(req.session.cart)//TODO: test avec un cart supprimé de la db
+router.get('/show', (req, res, next) => {
+  //TODO: test avec un cart supprimé de la db
   let cart
   let cartItems
   let totalPrice
@@ -19,6 +19,7 @@ router.get('/show', (req, res) => {
   }
 
   const successes = req.flash('success')
+
   res.render('cart', { cartItems: cartItems, successes: successes, totalPrice: totalPrice })
 })
 
