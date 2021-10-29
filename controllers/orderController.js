@@ -1,6 +1,6 @@
 const Order = require("../models/order")
 
-const createOrder = (user_id, items, totalPrice, dateOfPurchase, next) => {
+const createOrder = (user_id, items, totalPrice, dateOfPurchase) => {
 	console.log(items)
 	const order = new Order({ user_id: user_id, content: items, totalPrice: totalPrice, dateOfPurchase: dateOfPurchase })
 
@@ -8,11 +8,7 @@ const createOrder = (user_id, items, totalPrice, dateOfPurchase, next) => {
 
 	order.save((err, order) => {
 		console.log(order)
-		// if (err) {
-			// next(err)
-		// } else {
-			// next(null)
-		// }
+		if (err) { return err }
 	})
 }
 

@@ -1,17 +1,19 @@
 const isLoggedIn = (req, res, next) => {
   console.log('ISLOGGEDIN')
   if (req.isAuthenticated()) {
-    return next() //# btw return next et next
+    next()
+  } else {
+    req.session.oldUrl = req.originalUrl
+    res.redirect('/user/login')
   }
-  req.session.oldUrl = req.originalUrl
-  res.redirect('/user/login')
 }
 
 const isNotLoggedIn = (req, res, next) => {
 	if (!req.isAuthenticated()) {
-		return next()
-	}
-	res.redirect('/')
+		next()
+	} else {
+    res.redirect('/')
+  }
 }
 
 exports.isLoggedIn = isLoggedIn

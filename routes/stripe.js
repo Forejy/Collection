@@ -43,18 +43,8 @@ router.get('/successful-payment', isLoggedIn, (req, res, next) => {
 
 	const cart = new Cart(req.session.cart)
 	let items = cart.generateArray();
-	items.forEach(item => {
-		const newStock = item.item.stock - item.qty
-		const id = item.item._id
-		Item.findByIdAndUpdate(id, { stock: newStock }, (err, item) => {
-			console.log(item)
-			if (err) {
-				next(err)
-			}
-		})
-	})
 
-	items = items.map((elem) => {
+	items = items.map((elem) => { //Preparing the purchased order
 		item = elem.item
 		return {
 			item: {
@@ -70,10 +60,20 @@ router.get('/successful-payment', isLoggedIn, (req, res, next) => {
 		}})
 	const today = new Date(Date.now()).toDateString()
 	const user_id = res.locals.currentUser._id
-	createOrder(user_id, items, cart.totalPrice, today, next)
+	const err = createOrder(user_id, items, cart.totalPrice, today)
+	if (err) { let errors = [err] }
+
+	items.forEach(item => {
+		const newStock = item.item.stock - item.qty
+		const id = item.item._id
+		Item.findByIdAndUpdate(id, { stock: newStock }, (err) => {
+			if (err) { errors.push(err) }
+		})
+	})
+
 
 	delete req.session.cart
-	res.render('stripe/successful-payment')
+	res.render('stripe/successful-payment', { errors: errors })
 })
 
 module.exports = router
