@@ -12,6 +12,10 @@ const stripePublicKey = process.env.STRIPE_PUBLIC_KEY
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 
 router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
+	if (res.session.cart.totalPrice < 1) {
+		req.flash('info', "Total price needs to be 1$ minimum")
+		res.redirect('/cart/show')
+	}
 	const cartTotalPrice = req.session.cart.totalPrice * 100
 	const session = await stripe.checkout.sessions.create({
 		payment_method_types: ['card'],
