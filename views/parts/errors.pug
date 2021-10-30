@@ -5,6 +5,12 @@ if errors
       div
         span=error.status + ": "
         span=error.message
+
+if flashErrors && flashErrors.length > 0
+  section
+    h2 Flash Error
+    each error in flashErrors
+      div=error
 if infos && infos.length > 0
   section
     h2 Flash Info

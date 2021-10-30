@@ -33,7 +33,6 @@ const MongoStore = require('connect-mongo')
 
 const passport = require('passport');
 const LocalStrategy = require("passport-local").Strategy;
-const bcrypt = require("bcryptjs")
 const User = require('./models/user')
 
 var createError = require('http-errors');
