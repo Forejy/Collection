@@ -15,3 +15,8 @@ if successes && successes.length > 0
     h2 Flash Success
     each success in successes
       div=success
+if warnings && warnings.length > 0
+  section
+    h2 Flash Warning
+    each warning in warnings
+      div=warning

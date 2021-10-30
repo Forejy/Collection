@@ -19,8 +19,9 @@ router.get('/show', (req, res, next) => {
   }
 
   const successes = req.flash('success')
+  const warnings = req.flash('warnings')
 
-  res.render('cart', { cartItems: cartItems, successes: successes, totalPrice: totalPrice })
+  res.render('cart', { cartItems: cartItems, successes: successes, warnings: warnings, totalPrice: totalPrice })
 })
 
 router.get('/add-to-cart/:id', (req, res) => {

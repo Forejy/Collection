@@ -54,7 +54,7 @@ router.post('/signup', isNotLoggedIn, (req, res) => {
   })
 })
 
-/* GET currentUser own account */
+/* GET currentUser"own account */
 router.get('/myaccount', isLoggedIn, (req, res, next) => {
   const Order = require('../models/order')
   const findOrdersByUser = require('../controllers/orderController').findOrdersByUser
