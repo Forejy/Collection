@@ -59,9 +59,14 @@ router.get('/myaccount', isLoggedIn, (req, res, next) => {
   const Order = require('../models/order')
   const findOrdersByUser = require('../controllers/orderController').findOrdersByUser
 
-  const orders = findOrdersByUser(res.locals.currentUser._id, (err, ord) => {
-    console.log(orders)
+  findOrdersByUser(res.locals.currentUser._id, (err, orders) => {
+    if (err) {
+      next(err)
+    } else {
+      res.render('user/myaccount', { orders: orders })
+    }
   })
+
 
 })
 

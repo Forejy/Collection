@@ -35,7 +35,7 @@ router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
 	res.redirect(303, session.url)
 })
 
-router.get('/successful-payment', isLoggedIn, (req, res, next) => {
+router.get('/successful-payment', isLoggedIn, async (req, res, next) => {
 	//Find and Update 'stock' en soustrayant le stock de cet item dans le cart
 	const Item = require('../models/item')
 	const Cart = require('../models/cart')
@@ -60,20 +60,18 @@ router.get('/successful-payment', isLoggedIn, (req, res, next) => {
 		}})
 	const today = new Date(Date.now()).toDateString()
 	const user_id = res.locals.currentUser._id
-	const err = createOrder(user_id, items, cart.totalPrice, today)
-	if (err) { let errors = [err] }
+	const errors = await createOrder(user_id, items, cart.totalPrice, today)
+	if (errors) { let errorsArr = [err] }
 
 	items.forEach(item => {
 		const newStock = item.item.stock - item.qty
 		const id = item.item._id
-		Item.findByIdAndUpdate(id, { stock: newStock }, (err) => {
-			if (err) { errors.push(err) }
-		})
+		let errors2 = Item.findByIdAndUpdate(id, { stock: newStock })
+		if (errors2) { errorsArr.push(errors2) }
 	})
 
-
 	delete req.session.cart
-	res.render('stripe/successful-payment', { errors: errors })
+	res.render('stripe/successful-payment', { errors: errorsArr })
 })
 
 module.exports = router
