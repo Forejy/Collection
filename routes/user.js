@@ -57,26 +57,18 @@ router.post('/signup',
       }
     }
   }),
-  body('username').custom(value => {
-    const user = User.findOne({ username: value })
-    user.then(user => {
-    }).catch((err) => {
-      throw new Error(err)
-    })
+  body('username').custom(async value => {
+    const user = await User.findOne({ username: value })
     if (user) {
       throw new Error('Username already used, please choose an other')
     } else {
       return true
     }
   }),
-  body('email').custom(value => {
-    const user = User.findOne({ email: value })
-    user.then(user => {
-    }).catch((err) => {
-      throw new Error(err)
-    })
+  body('email').custom(async value => {
+    const user = await User.findOne({ email: value })
     if (user) {
-      throw new Error('Email already used, please use an other')
+      throw new Error('This email address has already been used')
     } else {
       return true
     }
