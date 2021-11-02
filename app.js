@@ -72,22 +72,21 @@ var app = express();
 
 
 // live-server>>
-const mongoURI = process.env.MONGO_URI
 
+//------ Mongo Connection -----//
+const mongoURI = process.env.MONGO_URI
 mongoose.connect(mongoURI)
 const conn = mongoose.connection
 
 
 
 
-
-
-
-//S. Storage - Middleware
 app.use(bodyParser.json())
 app.use(methodOverride('_method'))
 
-  let gfstream;
+
+//-----Image Storage-----//
+let gfstream;
 
 conn.once('open', () => {
   // Init stream
@@ -110,7 +109,7 @@ const stripeRouter = require('./routes/stripe');
 const { isRedirect } = require('node-fetch');
 const emailRouter = require('./routes/email')
 
-// view engine setup
+//----- View engine configuration -----//
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -119,6 +118,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//------ Express session configuration -----//
 app.use(session({
   secret: 'keyboard cat',
   store: MongoStore.create({
@@ -127,17 +128,19 @@ app.use(session({
   cookie: { maxAge: 180 * 60 * 1000 }
 }));
 
-//---------- Passport Middlewares ----------//
+//----- Passport middlewares -----//
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash())
 
+//------ Global variables ------//
 app.use(function(req, res, next) { //local currentUser & session
   res.locals.currentUser = req.user
   res.locals.session = req.session
   next();
 })
 
+//----- Routes -----//
 app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/fetch', fetchRouter); //TODO: A supprimer à un moment donné
@@ -156,73 +159,17 @@ app.use('/email', emailRouter)
 
 app.get('/image/new', (req, res) => { res.render('new-image')}) //TODO: C'est quoi cette ligne ?
 
-// passport.use(new LocalStrategy(
-//   function(username, password, done) {
-//     User.findOne({ username: username }, function (err, user) {
-//       if (err) { return done(err); }
-//       if (!user) {
-//           return done(null, false, { message: 'Incorrect username.' });
-//         }
-//         bcrypt.compare(password, user.password, (err, res) => {
-//           if (res) {
-//             return done(null, user)
-//           } else {
-//             return done(null, false, { message: 'Incorrect password.' });
-//           }
-//         })
-//       });
-//     }
-// ));
-
-
-passport.use(new LocalStrategy( async (username, password, done) => {
-  try {
-    const user = await User.findOne({ username: username });
-    console.log("user: ", user)
-    if (!user) {
-      console.log("user: ", user)
-        return done(null, false, { message: 'Incorrect username.' });
-      }
-    if(!user.isVerified) {
-      return done(null, false, { message: "Your account has not been verified. Please check your email to verify your account" })
-    }
-    bcrypt.compare(password, user.password, (err, res) => {
-      if (res) {
-        return done(null, user)
-      } else {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-    })
-  } catch(error) {
-    return done(error);
-  }
-}));
-
-passport.serializeUser((user, done) => {
-  console.log("serializeUser")
-  done(null, user.id);
-});
-
-passport.deserializeUser((id, done) => {
-  console.log("deserializeUser 1")
-  User.findById(id, (err, user) => {
-    if(err) { done(err)}
-    console.log("deserializeUser 2")
-    done(null, user);
-  });
-});
+//------------ Passport Configuration (Local Strategy) ------------//
+require('./config/passport')(passport)
 
 
 
-
-
-
-// catch 404 and forward to error handler
+//----- Catch 404, and Forward to error handler -----//
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+//----- Error handler -----/
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
@@ -232,11 +179,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('parts/error');
 });
-
-
-
-
-
 
 
 module.exports = app;

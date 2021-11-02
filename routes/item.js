@@ -12,7 +12,7 @@ const fields = { categories: categories, brands: brands, conditions: conditions 
 const upload = require('../storage')
 const multer = require('multer')
 
-
+//------ FORM for a new item -----//
 router.get('/new', function(req, res, next) {
   if (res.locals.currentUser !== undefined)
   {
@@ -36,7 +36,7 @@ const StringEachBelongsTo = (str) => {
   }
 }
 
-
+//------ UPLOAD a new item -----//
 router.post("/new",
 body('name').isAlphanumeric('en-US'),
 body('edition').custom(value => {
@@ -68,10 +68,12 @@ body('edition').custom(value => {
     }
   })
 
+//------ FORM for one image -----//
 router.get("/new/image", (req, res) => {
   res.render('new-image')
 })
 
+//------ UPLOAD Image -----//
 router.post("/new/image", (req, res) => {
   console.log("req.session.item: ", req.session.item)
   console.log("req.file: ", req.file)
@@ -95,6 +97,7 @@ router.post("/new/image", (req, res) => {
   })
 })
 
+//------ SHOW all items -----//
 router.get('/all', (req, res) => {
   Item.find({}, (err, items) => {
     if (err) { console.log(err) }
@@ -114,7 +117,7 @@ router.get('/all/resetdb', (req, res) => {
   // res.redirect('/')
 })
 
-
+//------ SHOW one item -----//
 router.get("/:id", function(req, res) {
   let { id } = req.params
 
@@ -126,6 +129,7 @@ router.get("/:id", function(req, res) {
   })
 })
 
+//------ SHOW one image -----//
 router.get('/image/:name', (req, res) => {
   const gfstream = res.locals.gfstream
   gfstream.files.findOne({ filename: req.params.name }, (err, file) => {

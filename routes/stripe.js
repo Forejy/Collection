@@ -8,9 +8,7 @@ if (process.env.NODE_ENV === 'development') {
 const stripe = require('stripe')(
   'sk_test_51JmGhYGQO5hF0ENvCYAYMXYmNjuK1dBaKJrtDDV0R5NVlnB43AdQOiuZLBqBdGbrtDuC5plOQeJ51t3Ad8kxCF3p00hB3EE4JA');
 
-const stripePublicKey = process.env.STRIPE_PUBLIC_KEY
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-
+//------ Checkout Route -----//
 router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
 	const cart = req.session.cart
 	console.log(cart)
@@ -43,6 +41,7 @@ router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
 	}
 })
 
+//------ Successful Payment Route -----//
 router.get('/successful-payment', isLoggedIn, async (req, res, next) => {
 	//Find and Update 'stock' en soustrayant le stock de cet item dans le cart
 	const Item = require('../models/item')
