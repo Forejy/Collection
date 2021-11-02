@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { body, validationResult } = require('express-validator')
+const session = require('express-session');
+const MongoStore = require('connect-mongo')
 
 if (process.env.NODE_ENV === 'development') {
   require('dotenv').config();
@@ -28,11 +30,9 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 
 
 // PASSPORT
-const session = require('express-session');
-const MongoStore = require('connect-mongo')
-
 const passport = require('passport');
 const LocalStrategy = require("passport-local").Strategy;
+const bcrypt = require("bcryptjs")
 const User = require('./models/user')
 
 var createError = require('http-errors');
@@ -59,16 +59,16 @@ var app = express();
 
 
 // <<live-server
-const livereload = require("livereload");
+// const livereload = require("livereload");
 
-const liveReloadServer = livereload.createServer();
-liveReloadServer.watch(path.join(__dirname, 'public'));
-app.use(connectLivereload());
+// const liveReloadServer = livereload.createServer();
+// liveReloadServer.watch(path.join(__dirname, 'views'));
 // liveReloadServer.server.once("connection", () => {
-//   setTimeout(() => {
-//     liveReloadServer.refresh("/")
-//   }, 100)
-// })
+    // setTimeout(() => {
+        // liveReloadServer.refresh("/")
+//       }, 100)
+//     })
+// app.use(connectLivereload());
 
 
 // live-server>>
@@ -108,7 +108,7 @@ const itemRouter = require('./routes/item');
 const cartRouter = require('./routes/cart');
 const stripeRouter = require('./routes/stripe');
 const { isRedirect } = require('node-fetch');
-
+const emailRouter = require('./routes/email')
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -126,6 +126,8 @@ app.use(session({
    }),
   cookie: { maxAge: 180 * 60 * 1000 }
 }));
+
+//---------- Passport Middlewares ----------//
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash())
@@ -148,38 +150,65 @@ app.use('/item', (req, res, next) => {
 app.use('/item', itemRouter);
 app.use('/cart', cartRouter);
 app.use('/stripe', stripeRouter)
+app.use('/email', emailRouter)
 
 
 
-app.get('/image/new', (req, res) => { res.render('new-image')})
+app.get('/image/new', (req, res) => { res.render('new-image')}) //TODO: C'est quoi cette ligne ?
+
+// passport.use(new LocalStrategy(
+//   function(username, password, done) {
+//     User.findOne({ username: username }, function (err, user) {
+//       if (err) { return done(err); }
+//       if (!user) {
+//           return done(null, false, { message: 'Incorrect username.' });
+//         }
+//         bcrypt.compare(password, user.password, (err, res) => {
+//           if (res) {
+//             return done(null, user)
+//           } else {
+//             return done(null, false, { message: 'Incorrect password.' });
+//           }
+//         })
+//       });
+//     }
+// ));
 
 
-
-passport.use(new LocalStrategy(
-  function(username, password, done) {
-    User.findOne({ username: username }, function (err, user) {
-      if (err) { return done(err); }
-      if (!user) {
-          return done(null, false, { message: 'Incorrect username.' });
-        }
-        bcrypt.compare(password, user.password, (err, res) => {
-          if (res) {
-            return done(null, user)
-          } else {
-            return done(null, false, { message: 'Incorrect password.' });
-          }
-        })
-      });
+passport.use(new LocalStrategy( async (username, password, done) => {
+  try {
+    const user = await User.findOne({ username: username });
+    console.log("user: ", user)
+    if (!user) {
+      console.log("user: ", user)
+        return done(null, false, { message: 'Incorrect username.' });
+      }
+    if(!user.isVerified) {
+      return done(null, false, { message: "Your account has not been verified. Please check your email to verify your account" })
     }
-));
+    bcrypt.compare(password, user.password, (err, res) => {
+      if (res) {
+        return done(null, user)
+      } else {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+    })
+  } catch(error) {
+    return done(error);
+  }
+}));
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser((user, done) => {
+  console.log("serializeUser")
   done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
+passport.deserializeUser((id, done) => {
+  console.log("deserializeUser 1")
+  User.findById(id, (err, user) => {
+    if(err) { done(err)}
+    console.log("deserializeUser 2")
+    done(null, user);
   });
 });
 

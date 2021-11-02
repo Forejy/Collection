@@ -17,8 +17,8 @@
     "mongodb": "~3.6.0",
     "mongoose": "~5.4.0",
     "node-fetch": "^2.6.2",
-    "livereload": "^0.9.3",
-    "connect-livereload": "^0.6.1",
+    "livereload": "*",
+    "connect-livereload": "*",
     "nodemon": "^2.0.13",
     "express-session": "*",
     "passport": "*",
@@ -33,6 +33,7 @@
     "phin": "*",
     "connect-mongo": "*",
     "connect-flash": "*",
-    "stripe": "*"
+    "stripe": "*",
+    "@sendgrid/mail": "*"
   }
 }
