@@ -17,7 +17,7 @@ block body
           article.item-list__item
             a(href="./item/" + item._id)
               img(class="item-list__item-image" src="/item/image/" + item.image)
-            div=item.price
+            div= item.price
             if currentUser
               div
                 a(href="/cart/add-to-cart/" + item._id) +

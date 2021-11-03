@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { findItemsByBrand } = require('../controllers/ItemController')
+const { findItemsByBrand } = require('../controllers/itemController')
 
 router.get("/:name", function(req, res, next) {
   let brand = req.params.name

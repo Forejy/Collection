@@ -12,11 +12,13 @@ const createItem = (obj, image, currentUser, done) => {
   })
 }
 
-const findItem = (id, done) => {
-  Item.findOne({ _id: id }, function(err, item) {
-    if (err) done(err)
-    done(null, item)
-  })
+const findItem = async (id, next) => {
+  try {
+    const item = await Item.findOne({ _id: id })
+    return item
+  } catch(error) {
+    return next(error)
+  }
 } //TODO demain : faire la route item/id puis afficher, et ensuite faire les liens
 
 const findItemByBrand = (brand, done) => {
@@ -54,7 +56,20 @@ const findTenItems = async (done) => {
   done(null, arrObj)
 }
 
+const findItems = async (id, done) => {
+  try {
+    console.log("findItems id: ", id)
+    const items = await Item.find({ user_id: id })
+    console.log("findItems items: ", items)
+    return items
+  } catch(error) {
+    done(error)
+  }
+
+}
+
 exports.createItem = createItem
 exports.findItem = findItem
 exports.findItemsByBrand = findItemByBrand
 exports.findTenItems = findTenItems
+exports.findItems = findItems

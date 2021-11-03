@@ -1,7 +1,7 @@
 const { createImmutableStateInvariantMiddleware } = require('@reduxjs/toolkit');
 const express = require('express');
 const router = express.Router();
-const { findItem, createItem } = require('../controllers/ItemController');
+const { findItem, createItem } = require('../controllers/itemController');
 const { body, isAlphanumeric, validationResult } = require('express-validator')
 const Item = require('../models/item')
 
@@ -118,15 +118,12 @@ router.get('/all/resetdb', (req, res) => {
 })
 
 //------ SHOW one item -----//
-router.get("/:id", function(req, res) {
+router.get("/:id", async (req, res, next) => {
   let { id } = req.params
+  const findItem = require("../controllers/itemController").findItem
+  const item = await findItem(id, next)
 
-  findItem(id, function(err, item) {
-    //TODO: ça plante ici pour une unhandled error
-    if (err) { console.log("ERROR: ", err) }
-    console.log(item)
-    res.render('item', { item: item })
-  })
+  res.render('item', { item: item })
 })
 
 //------ SHOW one image -----//
@@ -139,6 +136,25 @@ router.get('/image/:name', (req, res) => {
   })
 })
 
+//----- UPDATE one item -----//
+router.get('/:id/update', async (req, res, next) => {
+  let { id } = req.params
+  const findItem = require('../controllers/itemController').findItem
+
+  const item = await findItem(id, next)
+  console.log("item UPDATE id: ", id)
+  console.log("item UPDATE: ", await item)
+  res.render('item/update', { item: item, ...fields })
+})
+
+router.post(':id/update', async (req, res, next) => {
+  let { id } = req.params
+  const item = await findOne(id, next)
+  res.render('item/update', { item: item })
+  //req.body qqch
+  //Comparer l'item en db et l'item maintenant, resultat un objet
+  //Envoyer l'objet resultat de la comparaison en db, en mettant à jour l'item dans la db
+})
 
 
 module.exports = router;

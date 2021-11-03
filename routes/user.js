@@ -167,19 +167,21 @@ router.get('/verify-email', async (req, res, next) => {
 })
 
 /* GET currentUser"own account */
-router.get('/myaccount', isLoggedIn, (req, res, next) => {
-  const Order = require('../models/order')
+router.get('/account', isLoggedIn, async (req, res, next) => {
+  const findItems = require('../controllers/itemController').findItems
+  const userId = res.locals.currentUser._id
+
+  const userItems = await findItems(userId, next)
+  console.log("userItems: ", userItems)
+  res.render('user/account', { items: userItems })
+})
+
+router.get('/account/previous-orders', isLoggedIn, async (req, res, next) => {
   const findOrdersByUser = require('../controllers/orderController').findOrdersByUser
+  const userId = res.locals.currentUser._id
 
-  findOrdersByUser(res.locals.currentUser._id, (err, orders) => {
-    if (err) {
-      next(err)
-    } else {
-      res.render('user/myaccount', { orders: orders })
-    }
-  })
-
-
+  const userOrders = await findOrdersByUser(userId, next)
+  res.render('user/previous-orders', { orders: userOrders })
 })
 
 /* GET user shop. */

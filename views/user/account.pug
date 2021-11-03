@@ -1,0 +1,18 @@
+extends ../parts/layout
+
+block body
+	header
+		a(href="/user/account/previous-orders") Previous orders
+	section.item-list
+		each item in items
+			article.item-list__item
+				a(href="/item/" + item._id)
+					h2= item.name
+					img(class="item-list__item-image" src="/item/image/" + item.image)
+					div Price: #{item.price}
+					div Stock: #{item.stock}
+					div
+						a(href="/item/" + item._id + "/update") Update
+					div
+						form(action="/item/update" method="POST")
+							button(type="submit") Delete

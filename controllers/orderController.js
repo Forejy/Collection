@@ -12,15 +12,13 @@ const createOrder = (user_id, items, totalPrice, dateOfPurchase) => {
 	})
 }
 
-const findOrdersByUser = (user_id, done) => {
-	Order.find({ user_id: user_id }, (err, orders) => {
-    if (err) {
-			 done(err)
-		} else {
-			console.log("orders: ", orders)
-			done(null, orders)
-		}
-  })
+const findOrdersByUser = async (user_id, done) => {
+	try {
+		const orders = await Order.find({ user_id: user_id })
+		return orders
+	} catch(error) {
+		done(error)
+	}
 }
 
 exports.createOrder = createOrder
