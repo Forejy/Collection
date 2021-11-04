@@ -6,7 +6,7 @@ const { body, isAlphanumeric, validationResult } = require('express-validator')
 const Item = require('../models/item')
 
 const brands = ["Pokemon", "Magic", "Yugioh"]
-const categories = ["Cards"]
+const categories = ["Card"]
 const conditions = ["Mint", "Near Mint", "Excellent", "Good", "Light Played", "Played", "Poor"]
 const fields = { categories: categories, brands: brands, conditions: conditions }
 const upload = require('../storage')
@@ -144,6 +144,7 @@ router.get('/:id/update', async (req, res, next) => {
   const item = await findItem(id, next)
   console.log("item UPDATE id: ", id)
   console.log("item UPDATE: ", await item)
+
   res.render('item/update', { item: item, ...fields })
 })
 
