@@ -7,7 +7,7 @@ const ItemSchema = new Schema ({
   brand: { type: String, required: true },
   category: { type: String, required: true },
   edition: { type: String, required: true },
-  additional: { type: String, required: true },
+  additional: { type: String },
   price: { type: Number, required: true },
   stock: { type: Number, required: true },
   condition: { type: String, required: true },

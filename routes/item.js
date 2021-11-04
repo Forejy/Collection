@@ -12,6 +12,9 @@ const fields = { categories: categories, brands: brands, conditions: conditions 
 const upload = require('../storage')
 const multer = require('multer')
 
+const { isLoggedIn } = require('../helpers/login')
+
+
 //------ FORM for a new item -----//
 router.get('/new', function(req, res, next) {
   if (res.locals.currentUser !== undefined)
@@ -73,13 +76,9 @@ router.get("/new/image", (req, res) => {
   res.render('new-image')
 })
 
-//------ UPLOAD Image -----//
-router.post("/new/image", (req, res) => {
-  console.log("req.session.item: ", req.session.item)
-  console.log("req.file: ", req.file)
-
-  // Handle any error
+const uploadImage = async (req, res) => {
   upload.single('upload')(req, res, (err) => {
+    console.log("uploadImage, err: ", err)
     if (err instanceof multer.MulterError) {
       res.render("new-image", { error: err })
     } else if (err) {
@@ -88,6 +87,24 @@ router.post("/new/image", (req, res) => {
       res.redirect("/item//new/image")
     }
   })
+}
+
+//------ UPLOAD Image -----//
+router.post("/new/image", (req, res) => {
+  console.log("req.session.item: ", req.session.item)
+  console.log("req.file: ", req.file)
+
+  // Handle any error
+  uploadImage(req, res)
+  // upload.single('upload')(req, res, (err) => {
+  //   if (err instanceof multer.MulterError) {
+  //     res.render("new-image", { error: err })
+  //   } else if (err) {
+  //     res.render("new-image", { error: err })
+  //   } else {
+  //     res.redirect("/item//new/image")
+  //   }
+  // })
 
   // Create Item w/ the filename of the image
   createItem(req.session.item, req.file.filename, res.locals.currentUser, (err, id) => {
@@ -127,17 +144,24 @@ router.get("/:id", async (req, res, next) => {
 })
 
 //------ SHOW one image -----//
-router.get('/image/:name', (req, res) => {
+router.get('/image/:name', (req, res, next) => {
   const gfstream = res.locals.gfstream
   gfstream.files.findOne({ filename: req.params.name }, (err, file) => {
-    if (err) { console.log("ERROR: ", err) }
-    const readstream = gfstream.createReadStream({ _id: file._id })
-    return readstream.pipe(res)
+    if (err) {
+      console.log("SHOW one image: error: ", err)
+      next(err)
+    } else if (!file) {
+      console.log("//------ SHOW one image: file not found ------//")
+      next(new Error("File not found"))
+    } else {
+      const readstream = gfstream.createReadStream({ _id: file._id })
+      return readstream.pipe(res)
+    }
   })
 })
 
 //----- UPDATE one item -----//
-router.get('/:id/update', async (req, res, next) => {
+router.get('/:id/update', isLoggedIn, async (req, res, next) => {
   let { id } = req.params
   const findItem = require('../controllers/itemController').findItem
 
@@ -148,13 +172,96 @@ router.get('/:id/update', async (req, res, next) => {
   res.render('item/update', { item: item, ...fields })
 })
 
-router.post(':id/update', async (req, res, next) => {
+router.post('/:id/update', isLoggedIn, async (req, res, next) => {
   let { id } = req.params
   const item = await findOne(id, next)
   res.render('item/update', { item: item })
   //req.body qqch
   //Comparer l'item en db et l'item maintenant, resultat un objet
   //Envoyer l'objet resultat de la comparaison en db, en mettant à jour l'item dans la db
+})
+
+router.get('/:id/update/image', isLoggedIn, async (req, res, next) => {
+  let { id } = req.params
+  const findItem = require('../controllers/itemController').findItem
+
+  const item = await findItem(id, next)
+  console.log("item UPDATE id: ", id)
+  console.log("item UPDATE: ", await item)
+
+
+  res.render('item/image/update', { item: item })
+})
+
+router.post('/:id/update/image', isLoggedIn, async (req, res, next) => {
+  let { id } = req.params
+  const findItem = require('../controllers/itemController').findItem
+
+
+
+
+
+  upload.single('upload')(req, res, async (err) => {
+      if (err instanceof multer.MulterError) {
+        //TODO: Faire un redirect au lieu d'un
+        res.render("/" + id + "/image/update", { error: err })
+      } else if (err) {
+        res.render("/" + id + "/image/update", { error: err })
+      } else {
+        console.log("after await, req.file.filename: ", req.file.filename)
+        const item = await findItem(id, next)
+        const gfstream = res.locals.gfstream
+
+        gfstream.remove({ filename: item.filename }, async (err, item) => {
+          console.log("gfstream.remove item:", item)
+          console.log("update image, id: ", item)
+          if (err) {
+            res.render("/" + id + "/image/update", { error: err })
+          } else {
+            await Item.updateOne({ _id: id }, { image:  req.file.filename })
+            res.redirect("/item//new/image")
+          }
+        })
+
+      }
+    })
+
+
+
+  // await uploadImage(req, res)
+
+//      upload.single('upload')(req, res, (err) => {
+//       console.log("upload.single err: ", err)
+//       console.log("upload.single req.file: ", req.file)
+//       if (err instanceof multer.MulterError) {
+//         res.render("new-image", { error: err })
+//       } else if (err) {
+//         res.render("new-image", { error: err })
+//       } else {
+//         res.redirect("/item/new/image")
+//         return req.file.filename
+//       }
+//     })
+// }
+
+
+
+//   try {
+//     console.log("before await")
+//     await upload.single('upload')(req, res)
+//     console.log("req.file: ", req.file.filename)
+
+//     await Item.updateOne({ _id: id }, { image:  req.file.filename })
+//     console.log("after await")
+//   } catch(error) {
+//     console.log(error)
+//     if (error instanceof multer.MulterError) {
+//       res.render("new-image", { error: error })
+//     } else {
+//       res.render("new-image", { error: error })
+//     }
+//   }
+
 })
 
 

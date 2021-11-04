@@ -1,7 +1,7 @@
 extends ../parts/layout
 
 block body
-	section
+	section.container.item-list
 		section
 			article.item
 				h2= item.name
@@ -50,4 +50,5 @@ block body
 								each condition in conditions
 									option(value=condition)= condition
 					button Update Item
-					div Next Step : Add Image
+					div
+						a(href="./update/image") Change Image
