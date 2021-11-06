@@ -11,7 +11,7 @@ block body
 			div Stock: #{item.stock}
 			div Condition: #{item.condition}
 		section
-			form(action="/item/" + item._id + "/update/image?_method=PUT" method="POST" enctype="multipart/form-data")
+			form(action="/item/" + item._id + "/image/" + image + "?_method=PUT" method="POST" enctype="multipart/form-data")
 				ul.form
 					li
 						label(for="upload")

@@ -15,7 +15,7 @@ const multer = require('multer')
 const { isLoggedIn } = require('../helpers/login')
 
 
-//------ FORM for a new item -----//
+//------ NEW item -----//
 router.get('/new', function(req, res, next) {
   if (res.locals.currentUser !== undefined)
   {
@@ -39,7 +39,7 @@ const StringEachBelongsTo = (str) => {
   }
 }
 
-//------ UPLOAD a new item -----//
+//------ CREATE a new item -----//
 router.post("/new",
 body('name').isAlphanumeric('en-US'),
 body('edition').custom(value => {
@@ -71,7 +71,7 @@ body('edition').custom(value => {
     }
   })
 
-//------ FORM for one image -----//
+//------ EDIT for one image -----//
 router.get("/new/image", (req, res) => {
   res.render('new-image')
 })
@@ -89,7 +89,7 @@ const uploadImage = async (req, res) => {
   })
 }
 
-//------ UPLOAD Image -----//
+//------ CREATE Image -----//
 router.post("/new/image", (req, res) => {
   console.log("req.session.item: ", req.session.item)
   console.log("req.file: ", req.file)
@@ -114,7 +114,7 @@ router.post("/new/image", (req, res) => {
   })
 })
 
-//------ SHOW all items -----//
+//------ INDEX all items -----//
 router.get('/all', (req, res) => {
   Item.find({}, (err, items) => {
     if (err) { console.log(err) }
@@ -137,13 +137,12 @@ router.get('/all/resetdb', (req, res) => {
 //------ SHOW one item -----//
 router.get("/:id", async (req, res, next) => {
   let { id } = req.params
-  const findItem = require("../controllers/itemController").findItem
   const item = await findItem(id, next)
 
   res.render('item', { item: item })
 })
 
-//------ SHOW one image -----//
+//------ SHOW one image -----// //TODO: Pas le bon nom de route, je pense que ça devrait etre /:id/image/:name
 router.get('/image/:name', (req, res, next) => {
   const gfstream = res.locals.gfstream
   gfstream.files.findOne({ filename: req.params.name }, (err, file) => {
@@ -160,52 +159,44 @@ router.get('/image/:name', (req, res, next) => {
   })
 })
 
-//----- UPDATE one item -----//
-router.get('/:id/update', isLoggedIn, async (req, res, next) => {
+//----- EDIT one item -----//
+router.get('/:id/edit', isLoggedIn, async (req, res, next) => {
   let { id } = req.params
-  const findItem = require('../controllers/itemController').findItem
-
   const item = await findItem(id, next)
-  console.log("item UPDATE id: ", id)
-  console.log("item UPDATE: ", await item)
 
-  res.render('item/update', { item: item, ...fields })
+  const imageName = item.image.replace(/\.[^/.]+$/, "")
+  res.render('item/edit', { item: item, image: imageName, ...fields })
 })
 
-router.post('/:id/update', isLoggedIn, async (req, res, next) => {
+//----- UPDATE one item -----//
+router.put('/:id', isLoggedIn, async (req, res, next) => {
   let { id } = req.params
-  const item = await findOne(id, next)
-  res.render('item/update', { item: item })
-  //req.body qqch
-  //Comparer l'item en db et l'item maintenant, resultat un objet
-  //Envoyer l'objet resultat de la comparaison en db, en mettant à jour l'item dans la db
+  res.redirect(id + "/edit")
 })
 
-router.get('/:id/update/image', isLoggedIn, async (req, res, next) => {
+//----- EDIT one image -----//
+router.get('/:id/image/:name/edit', isLoggedIn, async (req, res, next) => {
   let { id } = req.params
-  const findItem = require('../controllers/itemController').findItem
-
   const item = await findItem(id, next)
   console.log("item UPDATE id: ", id)
   console.log("item UPDATE: ", await item)
 
   const flash = req.flash()
-  res.render('item/image/update', { item: item, flash: flash })
+  const imageName = item.image.replace(/\.[^/.]+$/, "")
+  res.render('item/image/edit', { item: item, image: imageName, flash: flash })
 })
 
-router.put('/:id/update/image', isLoggedIn, async (req, res, next) => {
-  let { id } = req.params
-  const findItem = require('../controllers/itemController').findItem
-  console.log("req.originalUrl: ", req.originalUrl)
+//----- UPDATE one image (and DESTROY the previous one) -----//
+router.put('/:id/image/:name', isLoggedIn, async (req, res, next) => {
+  let { id, name } = req.params
 
   upload.single('upload')(req, res, async (err) => {
       if (err instanceof multer.MulterError) {
-        //TODO: Faire un redirect au lieu d'un
         req.flash('error', err.message)
-        res.redirect(req.originalUrl)
+        res.redirect("/item/" + id + "/image/" + name + "/edit")
       } else if (err) {
         req.flash('error', err.message)
-        res.redirect(req.originalUrl)
+        res.redirect("/item/" + id + "/image/edit")
       } else {
         const item = await findItem(id, next)
         const gfstream = res.locals.gfstream
@@ -213,53 +204,16 @@ router.put('/:id/update/image', isLoggedIn, async (req, res, next) => {
         gfstream.remove({ filename: item.image, root: 'images' }, async (err, gridStore) => {
           if (err) {
             req.flash('error', err.message)
-            res.redirect(req.originalUrl)
+            res.redirect("/item/" + id + "/image/" + name + "/edit")
           } else {
             req.flash('success', "The image has well been updated.")
             await Item.updateOne({ _id: id }, { image:  req.file.filename })
-            res.redirect(req.originalUrl)
+            res.redirect("/item/" + id + "/image/" + name + "/edit")
           }
         })
 
       }
     })
-
-
-
-  // await uploadImage(req, res)
-
-//      upload.single('upload')(req, res, (err) => {
-//       console.log("upload.single err: ", err)
-//       console.log("upload.single req.file: ", req.file)
-//       if (err instanceof multer.MulterError) {
-//         res.render("new-image", { error: err })
-//       } else if (err) {
-//         res.render("new-image", { error: err })
-//       } else {
-//         res.redirect("/item/new/image")
-//         return req.file.filename
-//       }
-//     })
-// }
-
-
-
-//   try {
-//     console.log("before await")
-//     await upload.single('upload')(req, res)
-//     console.log("req.file: ", req.file.filename)
-
-//     await Item.updateOne({ _id: id }, { image:  req.file.filename })
-//     console.log("after await")
-//   } catch(error) {
-//     console.log(error)
-//     if (error instanceof multer.MulterError) {
-//       res.render("new-image", { error: error })
-//     } else {
-//       res.render("new-image", { error: error })
-//     }
-//   }
-
 })
 
 

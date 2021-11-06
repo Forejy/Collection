@@ -12,6 +12,7 @@ block body
 				div Condition: #{item.condition}
 		section
 			form(action="/item/new" method="POST")
+			form(action="/item/" + item._id + "?_method=PUT" method="POST" enctype="multipart/form-data")
 				ul.form
 					li
 						label(for="name") Name
@@ -36,7 +37,7 @@ block body
 							//- request to admin for a new one
 					li
 						label(for="additional") Additional
-						input(type="text" name="additional" value=item.additional required)
+						input(type="text" name="additional" value=item.additional)
 					li
 						label(for="price") Price
 						input(type="number" name="price" value=item.price   min="0" step=".01" required)
@@ -51,4 +52,4 @@ block body
 									option(value=condition)= condition
 					button Update Item
 					div
-						a(href="./update/image") Change Image
+						a(href="./image/" + image + "/edit") Change Image

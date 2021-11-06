@@ -17,8 +17,8 @@ const findItem = async (id, next) => {
     const item = await Item.findOne({ _id: id })
     console.log("findItem, item: ", item)
     return item
-  } catch(error) {
-    return next(error)
+  } catch(err) {
+    return next(err)
   }
 } //TODO demain : faire la route item/id puis afficher, et ensuite faire les liens
 
@@ -63,10 +63,17 @@ const findItems = async (id, done) => {
     const items = await Item.find({ user_id: id })
     console.log("findItems items: ", items)
     return items
-  } catch(error) {
-    done(error)
+  } catch(err) {
+    done(err)
   }
+}
 
+const updateItem = async (id, fieldsToUpdate, next) => {
+  try {
+    Item.updateOne({ _id: id }, { ...fieldsToUpdate })
+  } catch(err) {
+    next(err)
+  }
 }
 
 exports.createItem = createItem

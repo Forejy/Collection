@@ -12,7 +12,7 @@ block body
 					div Price: #{item.price}
 					div Stock: #{item.stock}
 					div
-						a(href="/item/" + item._id + "/update") Update
+						a(href="/item/" + item._id + "/edit") Edit item
 					div
 						form(action="/item/update" method="POST")
-							button(type="submit") Delete
+							button(type="submit") Delete item
