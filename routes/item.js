@@ -189,37 +189,35 @@ router.get('/:id/update/image', isLoggedIn, async (req, res, next) => {
   console.log("item UPDATE id: ", id)
   console.log("item UPDATE: ", await item)
 
-
-  res.render('item/image/update', { item: item })
+  const flash = req.flash()
+  res.render('item/image/update', { item: item, flash: flash })
 })
 
-router.post('/:id/update/image', isLoggedIn, async (req, res, next) => {
+router.put('/:id/update/image', isLoggedIn, async (req, res, next) => {
   let { id } = req.params
   const findItem = require('../controllers/itemController').findItem
-
-
-
-
+  console.log("req.originalUrl: ", req.originalUrl)
 
   upload.single('upload')(req, res, async (err) => {
       if (err instanceof multer.MulterError) {
         //TODO: Faire un redirect au lieu d'un
-        res.render("/" + id + "/image/update", { error: err })
+        req.flash('error', err.message)
+        res.redirect(req.originalUrl)
       } else if (err) {
-        res.render("/" + id + "/image/update", { error: err })
+        req.flash('error', err.message)
+        res.redirect(req.originalUrl)
       } else {
-        console.log("after await, req.file.filename: ", req.file.filename)
         const item = await findItem(id, next)
         const gfstream = res.locals.gfstream
 
-        gfstream.remove({ filename: item.filename }, async (err, item) => {
-          console.log("gfstream.remove item:", item)
-          console.log("update image, id: ", item)
+        gfstream.remove({ filename: item.image, root: 'images' }, async (err, gridStore) => {
           if (err) {
-            res.render("/" + id + "/image/update", { error: err })
+            req.flash('error', err.message)
+            res.redirect(req.originalUrl)
           } else {
+            req.flash('success', "The image has well been updated.")
             await Item.updateOne({ _id: id }, { image:  req.file.filename })
-            res.redirect("/item//new/image")
+            res.redirect(req.originalUrl)
           }
         })
 

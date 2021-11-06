@@ -15,9 +15,8 @@ const sgMail = require('@sendgrid/mail')
 router.get('/login', isNotLoggedIn, (req, res) => {
     const message = req.session.message //erreurs durant l'auth de passport //TODO: à quel moment j'assigne le message, pcq je dois pouvoir utiliser req.flash maintenant
     req.session.message = null
-    const successes = req.flash('success')
-    const flashErrors = req.flash('error')
-    res.render('log-in', { message: message, flashErrors: flashErrors, successes: successes })
+    const flash = req.flash()
+    res.render('log-in', { message: message, flash: flash })
 })
 
 router.get('/logout', isLoggedIn, (req, res) => {
@@ -26,8 +25,8 @@ router.get('/logout', isLoggedIn, (req, res) => {
 })
 
 router.get('/signup', isNotLoggedIn, (req, res) => {
-    const flashErrors = req.flash('error')
-    res.render('sign-up', { flashErrors: flashErrors })
+    const flash = req.flash()
+    res.render('sign-up', { flash: flash })
 })
 
 
@@ -40,8 +39,9 @@ router.post('/login', isNotLoggedIn, passport.authenticate('local', { failureRed
     console.log('oldUrl: ', req.session.oldUrl)
     if (req.session.oldUrl)
     {
+      const redirect = req.session.oldUrl
 			req.session.oldUrl = null
-			res.redirect(req.session.oldUrl)
+			res.redirect(redirect)
     } else {
 			res.redirect('/');
 		}
@@ -190,6 +190,7 @@ router.get('/:user_id', isLoggedIn, (req, res, next) => {
   const user_id = req.params.user_id
 
   User.findOne({ _id: user_id }, (err, user) => {
+    console.log()
     if (err) { console.log(err) }
 
     Item.find({ user_id: user_id }, (err, items) => {

@@ -6,23 +6,9 @@ if errors
         span=error.status + ": "
         span=error.message
 
-if flashErrors && flashErrors.length > 0
-  section
-    h2 Flash Error
-    each error in flashErrors
-      div=error
-if infos && infos.length > 0
-  section
-    h2 Flash Info
-    each info in infos
-      div=info
-if successes && successes.length > 0
-  section
-    h2 Flash Success
-    each success in successes
-      div=success
-if warnings && warnings.length > 0
-  section
-    h2 Flash Warning
-    each warning in warnings
-      div=warning
+if flash
+  each msgs, typeMsgs in flash
+    section
+      h2.flash-title=typeMsgs
+      each msg in msgs
+        div=msg

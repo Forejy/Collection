@@ -136,3 +136,7 @@ a {
   width: max-content;
   margin: 0 auto;
 }
+
+.flash-title::first-letter {
+  text-transform: capitalize;
+}

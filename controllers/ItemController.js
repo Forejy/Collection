@@ -15,6 +15,7 @@ const createItem = (obj, image, currentUser, done) => {
 const findItem = async (id, next) => {
   try {
     const item = await Item.findOne({ _id: id })
+    console.log("findItem, item: ", item)
     return item
   } catch(error) {
     return next(error)

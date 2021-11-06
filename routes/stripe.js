@@ -13,7 +13,7 @@ router.post('/create-checkout-session',  isLoggedIn, async (req, res) => {
 	const cart = req.session.cart
 	console.log(cart)
 	if (cart.totalPrice < 1) {
-		req.flash('warnings', "Total price needs to be 1$ minimum")
+		req.flash('warning', "Total price needs to be 1$ minimum")
 
 		res.redirect('/cart/show')
 	} else {
