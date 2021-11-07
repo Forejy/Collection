@@ -41,8 +41,7 @@ const StringEachBelongsTo = (str) => {
 
 //------ CREATE a new item -----//
 router.post("/new",
-body('name').isAlphanumeric('en-US'),
-body('edition').custom(value => {
+body(['name', 'edition']).custom(value => {
   var i = value.length
   while (i--) {
     if (!value.charAt(i).match(/[a-zA-Z0-9- #&]/))
@@ -139,7 +138,7 @@ router.get("/:id", async (req, res, next) => {
   let { id } = req.params
   const item = await findItem(id, next)
 
-  res.render('item', { item: item })
+  res.render('item', { item: item, flash: flash })
 })
 
 //------ SHOW one image -----// //TODO: Pas le bon nom de route, je pense que ça devrait etre /:id/image/:name
@@ -165,13 +164,13 @@ router.get('/:id/edit', isLoggedIn, async (req, res, next) => {
   const item = await findItem(id, next)
 
   const imageName = item.image.replace(/\.[^/.]+$/, "")
-  res.render('item/edit', { item: item, image: imageName, ...fields })
+  const flash = req.flash()
+  res.render('item/edit', { item: item, flash: flash, image: imageName, ...fields })
 })
 
 //----- UPDATE one item -----//
-router.put('/:id', isLoggedIn, async (req, res, next) => {
-  body('name').isAlphanumeric('en-US'),
-  body('edition').custom(value => {
+router.put('/:id', isLoggedIn,
+  body(['name', 'edition']).custom(value => {
     var i = value.length
     while (i--) {
       if (!value.charAt(i).match(/[a-zA-Z0-9- #&]/))
@@ -182,32 +181,29 @@ router.put('/:id', isLoggedIn, async (req, res, next) => {
       }
     }
   }),
-(req, res, next) => {
+async (req, res, next) => {
     // Extract the validation errors from a request.
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
         // There are errors. Render form again with sanitized values/errors messages.
         // Error messages can be returned in an array using `errors.array()`.
-        console.log(errors.array())
-        res.render('item/edit', { item: item, errors: errors.array(), ...fields }) //TODO: Coucou, J'EN SUIS ICI : Utliser redirect et req.flash
+        console.log("errors.array():", errors.array())
+        const errorsMsg = errors.array().map((elem) => { return elem.msg + " for: " + elem.param + " with value \'" + elem.value + "\'"})
+        const { id } = req.params
+        req.flash('error', errorsMsg)
+        res.redirect('./' + id + '/edit')
     } else {
       // Data from form is valid.
       // Go to 2nd part of the form
-        req.session.item = req.body
-        res.redirect("/item/new/image")
+        const newProps = req.body
+        const { id } = req.params
+        await Item.updateOne( { _id: id }, { ...newProps })
+        req.flash('success', 'Item has been well updated')
+        res.redirect('./' + id + '/edit')
     }
   }
-})
-
-router.put('/:id', isLoggedIn, async (req, res, next) => {
-  let { id } = req.params
-
-  const newProps = req.body
-
-  await Item.updateOne( { _id: id }, { ...newProps })
-  res.redirect(id + "/edit")
-})
+)
 
 //------ DELETE one item ------//
 router.delete("/:id", isLoggedIn, async (req, res, next) => {
