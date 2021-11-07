@@ -71,7 +71,7 @@ body('edition').custom(value => {
     }
   })
 
-//------ EDIT for one image -----//
+//------ NEW for one image -----//
 router.get("/new/image", (req, res) => {
   res.render('new-image')
 })
@@ -170,8 +170,50 @@ router.get('/:id/edit', isLoggedIn, async (req, res, next) => {
 
 //----- UPDATE one item -----//
 router.put('/:id', isLoggedIn, async (req, res, next) => {
+  body('name').isAlphanumeric('en-US'),
+  body('edition').custom(value => {
+    var i = value.length
+    while (i--) {
+      if (!value.charAt(i).match(/[a-zA-Z0-9- #&]/))
+      {
+        throw new Error('Illegal Characters : only a-Z, 0-9. -#& and \' \'')
+      } else {
+        return true
+      }
+    }
+  }),
+(req, res, next) => {
+    // Extract the validation errors from a request.
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        // There are errors. Render form again with sanitized values/errors messages.
+        // Error messages can be returned in an array using `errors.array()`.
+        console.log(errors.array())
+        res.render('item/edit', { item: item, errors: errors.array(), ...fields }) //TODO: Coucou, J'EN SUIS ICI : Utliser redirect et req.flash
+    } else {
+      // Data from form is valid.
+      // Go to 2nd part of the form
+        req.session.item = req.body
+        res.redirect("/item/new/image")
+    }
+  }
+})
+
+router.put('/:id', isLoggedIn, async (req, res, next) => {
   let { id } = req.params
+
+  const newProps = req.body
+
+  await Item.updateOne( { _id: id }, { ...newProps })
   res.redirect(id + "/edit")
+})
+
+//------ DELETE one item ------//
+router.delete("/:id", isLoggedIn, async (req, res, next) => {
+  const { id } = req.params
+  await Item.deleteOne({ _id: id })
+  res.redirect("/user/account")
 })
 
 //----- EDIT one image -----//
