@@ -8,7 +8,7 @@ block body
 			article.item-list__item
 				a(href="/item/" + item._id)
 					h2= item.name
-					img(class="item-list__item-image" src="/item/image/" + item.image)
+					img(class="item-list__item-image" src="/item/" + item._id + "/image/" + item.image)
 					div Price: #{item.price}
 					div Stock: #{item.stock}
 					div

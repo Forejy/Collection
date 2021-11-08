@@ -119,7 +119,7 @@ router.get("/:id", async (req, res, next) => {
 })
 
 //------ SHOW one image -----// //TODO: Pas le bon nom de route, je pense que ça devrait etre /:id/image/:name
-router.get('/image/:name', (req, res, next) => {
+router.get('/:id/image/:name', (req, res, next) => {
   const gfstream = res.locals.gfstream
   gfstream.files.findOne({ filename: req.params.name }, (err, file) => {
     if (err) {
@@ -197,30 +197,30 @@ router.get('/:id/image/:name/edit', isLoggedIn, isOwner, async (item, req, res, 
 
 //----- UPDATE one image (and DESTROY the previous one) -----//
 router.put('/:id/image/:name', isLoggedIn, isOwner, async (item, req, res, next) => {
-  let { id, name } = req.params
 
   upload.single('upload')(req, res, async (err) => {
-      if (err instanceof multer.MulterError) {
-        req.flash('error', err.message)
-        res.redirect("/item/" + id + "/image/" + name + "/edit")
-      } else if (err) {
-        req.flash('error', err.message)
-        res.redirect("/item/" + id + "/image/edit")
-      } else {
-        const gfstream = res.locals.gfstream
+    let { id, name } = req.params
+    if (err instanceof multer.MulterError) {
+      req.flash('error', err.message)
+      res.redirect("/item/" + id + "/image/" + name + "/edit")
+    } else if (err) {
+      req.flash('error', err.message)
+      res.redirect("/item/" + id + "/image/edit")
+    } else {
+      const gfstream = res.locals.gfstream
 
-        gfstream.remove({ filename: item.image, root: 'images' }, async (err, gridStore) => {
-          if (err) {
-            req.flash('error', err.message)
-            res.redirect("/item/" + id + "/image/" + name + "/edit")
-          } else {
-            req.flash('success', "The image has well been updated.")
-            await Item.updateOne({ _id: id }, { image:  req.file.filename })
-            res.redirect("/item/" + id + "/image/" + name + "/edit")
-          }
-        })
-      }
-    })
+      gfstream.remove({ filename: item.image, root: 'images' }, async (err, gridStore) => {
+        if (err) {
+          req.flash('error', err.message)
+          res.redirect("/item/" + id + "/image/" + name + "/edit")
+        } else {
+          req.flash('success', "The image has well been updated.")
+          await Item.updateOne({ _id: id }, { image:  req.file.filename })
+          res.redirect("/item/" + id + "/image/" + name + "/edit")
+        }
+      })
+    }
+  })
 })
 
 

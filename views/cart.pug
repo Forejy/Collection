@@ -9,7 +9,7 @@ block body
       each cartItem in cartItems
         div= cartItem.item.name
         a(href='../item/' + cartItem.item._id )
-          img(class="item-list__item-image" src="/item/image/" + cartItem.item.image)
+          img(class="item-list__item-image" src="/item/" + cartItem._id + "/image/" + cartItem.item.image)
         div="quantity in cart: " + cartItem.qty
         div="total price: " + cartItem.price
         div

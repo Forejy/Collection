@@ -16,7 +16,7 @@ block body
         each item in package.item
           article.item-list__item
             a(href="./item/" + item._id)
-              img(class="item-list__item-image" src="/item/image/" + item.image)
+              img(class="item-list__item-image" src="/item/" + item._id + "/image/" + item.image)
             div= item.price
             if currentUser
               div
