@@ -14,5 +14,5 @@ block body
 					div
 						a(href="/item/" + item._id + "/edit") Edit item
 					div
-						form(action="/item/" + item._id + "?_method=DELETE" method="POST")
+						form(action="/item/" + item._id + "?_method=DELETE" method="POST" onsubmit="return confirm('Are you sure?');")
 							button(type="submit") Delete item

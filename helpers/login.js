@@ -30,5 +30,18 @@ const isVerified = async (req, res, next) => {
   }
 }
 
+const isOwner = async (req, res, next) => {
+  const { id } = req.params
+  const item = await findItem(id, next)
+
+  if (item.user_id == res.locals.currentUser._id) {
+    next(item)
+  } else {
+    req.flash('warning', "You can't edit an item you don't own" )
+    res.redirect('/')
+  }
+}
+
 exports.isLoggedIn = isLoggedIn
 exports.isNotLoggedIn = isNotLoggedIn
+exports.isOwner = isOwner

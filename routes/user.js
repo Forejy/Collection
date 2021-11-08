@@ -166,14 +166,15 @@ router.get('/verify-email', async (req, res, next) => {
   }
 })
 
-/* GET currentUser"own account */
+
+/* GET currentUser own account */
 router.get('/account', isLoggedIn, async (req, res, next) => {
   const findItems = require('../controllers/itemController').findItems
   const userId = res.locals.currentUser._id
 
   const userItems = await findItems(userId, next)
-  console.log("userItems: ", userItems)
-  res.render('user/account', { items: userItems })
+  const flash = req.flash()
+  res.render('user/account', { items: userItems, flash: flash })
 })
 
 router.get('/account/previous-orders', isLoggedIn, async (req, res, next) => {

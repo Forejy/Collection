@@ -12,7 +12,8 @@ const fields = { categories: categories, brands: brands, conditions: conditions 
 const upload = require('../storage')
 const multer = require('multer')
 
-const { isLoggedIn } = require('../helpers/login')
+const { isLoggedIn, isOwner } = require('../helpers/login')
+
 
 
 //------ NEW item -----//
@@ -26,18 +27,6 @@ router.get('/new', function(req, res, next) {
     res.redirect('/user/login')
   }
 })
-
-const StringEachBelongsTo = (str) => {
-  const i = str.length
-  while (i--) {
-    if (!str.charAt(i).match(/[a-zA-Z0-9- #&]/))
-    {
-      console.log(false)
-    } else {
-      console.log (true)
-    }
-  }
-}
 
 //------ CREATE a new item -----//
 router.post("/new",
@@ -68,14 +57,19 @@ body(['name', 'edition']).custom(value => {
         req.session.item = req.body
         res.redirect("/item/new/image")
     }
-  })
+})
 
 //------ NEW for one image -----//
 router.get("/new/image", (req, res) => {
   res.render('new-image')
 })
 
-const uploadImage = async (req, res) => {
+//------ CREATE Image -----//
+router.post("/new/image", (req, res) => {
+  console.log("req.session.item: ", req.session.item)
+  console.log("req.file: ", req.file)
+
+  // Handle any error
   upload.single('upload')(req, res, (err) => {
     console.log("uploadImage, err: ", err)
     if (err instanceof multer.MulterError) {
@@ -86,24 +80,6 @@ const uploadImage = async (req, res) => {
       res.redirect("/item//new/image")
     }
   })
-}
-
-//------ CREATE Image -----//
-router.post("/new/image", (req, res) => {
-  console.log("req.session.item: ", req.session.item)
-  console.log("req.file: ", req.file)
-
-  // Handle any error
-  uploadImage(req, res)
-  // upload.single('upload')(req, res, (err) => {
-  //   if (err instanceof multer.MulterError) {
-  //     res.render("new-image", { error: err })
-  //   } else if (err) {
-  //     res.render("new-image", { error: err })
-  //   } else {
-  //     res.redirect("/item//new/image")
-  //   }
-  // })
 
   // Create Item w/ the filename of the image
   createItem(req.session.item, req.file.filename, res.locals.currentUser, (err, id) => {
@@ -138,6 +114,7 @@ router.get("/:id", async (req, res, next) => {
   let { id } = req.params
   const item = await findItem(id, next)
 
+  const flash = req.flash()
   res.render('item', { item: item, flash: flash })
 })
 
@@ -158,11 +135,11 @@ router.get('/image/:name', (req, res, next) => {
   })
 })
 
-//----- EDIT one item -----//
-router.get('/:id/edit', isLoggedIn, async (req, res, next) => {
-  let { id } = req.params
-  const item = await findItem(id, next)
 
+
+
+//----- EDIT one item -----//
+router.get('/:id/edit', isLoggedIn, isOwner, async (item, req, res, next) => {
   const imageName = item.image.replace(/\.[^/.]+$/, "")
   const flash = req.flash()
   res.render('item/edit', { item: item, flash: flash, image: imageName, ...fields })
@@ -181,51 +158,45 @@ router.put('/:id', isLoggedIn,
       }
     }
   }),
-async (req, res, next) => {
+isOwner,
+async (item, req, res, next) => {
     // Extract the validation errors from a request.
     const errors = validationResult(req)
-
+    const { id } = req.params
     if (!errors.isEmpty()) {
         // There are errors. Render form again with sanitized values/errors messages.
         // Error messages can be returned in an array using `errors.array()`.
-        console.log("errors.array():", errors.array())
         const errorsMsg = errors.array().map((elem) => { return elem.msg + " for: " + elem.param + " with value \'" + elem.value + "\'"})
-        const { id } = req.params
         req.flash('error', errorsMsg)
         res.redirect('./' + id + '/edit')
     } else {
       // Data from form is valid.
       // Go to 2nd part of the form
         const newProps = req.body
-        const { id } = req.params
         await Item.updateOne( { _id: id }, { ...newProps })
-        req.flash('success', 'Item has been well updated')
+        req.flash('success', 'Your item has been well updated')
         res.redirect('./' + id + '/edit')
     }
   }
 )
 
 //------ DELETE one item ------//
-router.delete("/:id", isLoggedIn, async (req, res, next) => {
+router.delete("/:id", isLoggedIn, isOwner, async (item, req, res, next) => {
   const { id } = req.params
   await Item.deleteOne({ _id: id })
+  req.flash('success', "Your item has been well deleted")
   res.redirect("/user/account")
 })
 
 //----- EDIT one image -----//
-router.get('/:id/image/:name/edit', isLoggedIn, async (req, res, next) => {
-  let { id } = req.params
-  const item = await findItem(id, next)
-  console.log("item UPDATE id: ", id)
-  console.log("item UPDATE: ", await item)
-
+router.get('/:id/image/:name/edit', isLoggedIn, isOwner, async (item, req, res, next) => {
   const flash = req.flash()
   const imageName = item.image.replace(/\.[^/.]+$/, "")
   res.render('item/image/edit', { item: item, image: imageName, flash: flash })
 })
 
 //----- UPDATE one image (and DESTROY the previous one) -----//
-router.put('/:id/image/:name', isLoggedIn, async (req, res, next) => {
+router.put('/:id/image/:name', isLoggedIn, isOwner, async (item, req, res, next) => {
   let { id, name } = req.params
 
   upload.single('upload')(req, res, async (err) => {
@@ -236,7 +207,6 @@ router.put('/:id/image/:name', isLoggedIn, async (req, res, next) => {
         req.flash('error', err.message)
         res.redirect("/item/" + id + "/image/edit")
       } else {
-        const item = await findItem(id, next)
         const gfstream = res.locals.gfstream
 
         gfstream.remove({ filename: item.image, root: 'images' }, async (err, gridStore) => {
@@ -249,7 +219,6 @@ router.put('/:id/image/:name', isLoggedIn, async (req, res, next) => {
             res.redirect("/item/" + id + "/image/" + name + "/edit")
           }
         })
-
       }
     })
 })
