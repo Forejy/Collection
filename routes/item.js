@@ -119,23 +119,23 @@ router.get("/:id", async (req, res, next) => {
 })
 
 //------ SHOW one image -----// //TODO: Pas le bon nom de route, je pense que ça devrait etre /:id/image/:name
-router.get('/:id/image/:name', (req, res, next) => {
-  const gfstream = res.locals.gfstream
-  gfstream.files.findOne({ filename: req.params.name }, (err, file) => {
-    if (err) {
-      console.log("SHOW one image: error: ", err)
-      next(err)
-    } else if (!file) {
+router.get('/:id/image/:name', async (req, res, next) => {
+  try {
+    const gridFSBucket = res.locals.gridFSBucket
+    const file = (await gridFSBucket.find({ filename: req.params.name }).limit(1).toArray())[0]
+
+    if (!file) {
       console.log("//------ SHOW one image: file not found ------//")
       next(new Error("File not found"))
-    } else {
-      const readstream = gfstream.createReadStream({ _id: file._id })
-      return readstream.pipe(res)
     }
-  })
+
+    const readStream = await gridFSBucket.openDownloadStream(file._id)
+    return readStream.pipe(res)
+  } catch(err) {
+      console.log("SHOW one image: error: ", err)
+      next(err)
+  }
 })
-
-
 
 
 //----- EDIT one item -----//

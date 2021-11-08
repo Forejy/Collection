@@ -75,7 +75,9 @@ var app = express();
 
 //------ Mongo Connection -----//
 const mongoURI = process.env.MONGO_URI
-mongoose.connect(mongoURI)
+// mongoose.connect(mongoURI)
+mongoose.connect(mongoURI, { useUnifiedTopology: true, useNewUrlParser: true });
+
 const conn = mongoose.connection
 
 
@@ -87,13 +89,15 @@ app.use(methodOverride('_method'))
 
 //-----Image Storage-----//
 let gfstream;
+let gridFSBucket;
 
 conn.once('open', () => {
   // Init stream
   gfstream = Grid(conn.db, mongoose.mongo); // j'établis un stream avec la db, et avec un intermédiaire étant mongoose
-  gfstream.collection('images') //j'ai le stream qui appelle une collection
-})
 
+  gfstream.collection('images') //j'ai le stream qui appelle une collection
+  gridFSBucket  = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: 'images' })
+})
 
 
 
@@ -125,7 +129,9 @@ app.use(session({
   store: MongoStore.create({
     mongoUrl: mongoURI
    }),
-  cookie: { maxAge: 180 * 60 * 1000 }
+  cookie: { maxAge: 180 * 60 * 1000 },
+  resave: true,
+  saveUninitialized: true
 }));
 
 //----- Passport middlewares -----//
@@ -147,6 +153,7 @@ app.use('/fetch', fetchRouter); //TODO: A supprimer à un moment donné
 app.use('/brand', brandRouter);
 app.use('/item', (req, res, next) => {
   res.locals.gfstream = gfstream
+  res.locals.gridFSBucket = gridFSBucket
   next()
 })
 // TODO: /item/image
