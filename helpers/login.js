@@ -32,6 +32,7 @@ const isVerified = async (req, res, next) => {
 
 const isOwner = async (req, res, next) => {
   const { id } = req.params
+  const { findItem } = require("../controllers/ItemController")
   const item = await findItem(id, next)
 
   if (item.user_id == res.locals.currentUser._id) {

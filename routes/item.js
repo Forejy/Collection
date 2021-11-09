@@ -124,18 +124,13 @@ router.get("/:id", async (req, res, next) => {
 router.get('/:id/image/:name', async (req, res, next) => {
   try {
     const gridFSBucket = res.locals.gridFSBucket
-    const file = (await gridFSBucket.find({ filename: req.params.name }).limit(1).toArray())[0]
+    const imgName = req.params.name
 
-    if (!file) {
-      console.log("//------ SHOW one image: file not found ------//")
-      next(new Error("File not found"))
-    }
-
-    const readStream = await gridFSBucket.openDownloadStream(file._id)
+    const readStream = await gridFSBucket.openDownloadStreamByName(imgName)
     return readStream.pipe(res)
   } catch(err) {
       console.log("SHOW one image: error: ", err)
-      next(err)
+      // next(err) //Ça marche pas avec les images
   }
 })
 
