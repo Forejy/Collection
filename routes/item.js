@@ -118,6 +118,8 @@ router.get("/:id", async (req, res, next) => {
   res.render('item', { item: item, flash: flash })
 })
 
+
+
 //------ SHOW one image -----// //TODO: Pas le bon nom de route, je pense que ça devrait etre /:id/image/:name
 router.get('/:id/image/:name', async (req, res, next) => {
   try {
