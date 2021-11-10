@@ -6,7 +6,8 @@ const { isLoggedIn, isNotLoggedIn } = require('../helpers/login')
 const bcrypt = require("bcryptjs")
 const passport = require('passport');
 const { body, isAlphanumeric, validationResult } = require('express-validator')
-const sgMail = require('@sendgrid/mail')
+const sgMail = require('@sendgrid/mail');
+const Wishlist = require('../models/wishlist');
 
 
 
@@ -60,18 +61,10 @@ router.post('/signup',
       }
     }
   }),
-  body('username').custom(async value => {
+  body(['username', 'email']).custom(async value => {
     const user = await User.findOne({ username: value })
     if (user) {
       throw new Error('Username already used, please choose an other')
-    } else {
-      return true
-    }
-  }),
-  body('email').custom(async value => {
-    const user = await User.findOne({ email: value })
-    if (user) {
-      throw new Error('This email address has already been used')
     } else {
       return true
     }
@@ -130,6 +123,12 @@ router.post('/signup',
           try {
             sgMail.setApiKey(process.env.SENDGRID_API_KEY)
             await sgMail.send(msg)
+            const wishlist = new Wishlist({
+              name: "Wishlist",
+              items: [],
+              user_id: user._id
+            })
+            await wishlist.save()
             req.flash('success', 'Thanks for registering. Please check your email to verify your account')
             res.redirect('/user/login')
           } catch(error) {
@@ -183,6 +182,10 @@ router.get('/account/previous-orders', isLoggedIn, async (req, res, next) => {
 
   const userOrders = await findOrdersByUser(userId, next)
   res.render('user/previous-orders', { orders: userOrders })
+})
+
+router.get('/account/wishlist', isLoggedIn, async (req, res) => {
+
 })
 
 /* GET user shop. */

@@ -1,0 +1,8 @@
+extends ../parts/layout
+include ./parts/mixins_item
+
+block body
+	section
+		each item in wishlist.items
+			article
+				+item(item)

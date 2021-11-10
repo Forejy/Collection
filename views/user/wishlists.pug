@@ -1,0 +1,7 @@
+extends ../parts/layout
+
+block body
+	section
+		each wishlist in wishlists
+			article
+				h2=wishlist.name
