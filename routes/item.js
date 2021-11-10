@@ -66,9 +66,6 @@ router.get("/new/image", (req, res) => {
 
 //------ CREATE Image -----//
 router.post("/new/image", (req, res) => {
-  console.log("req.session.item: ", req.session.item)
-  console.log("req.file: ", req.file)
-
   // Handle any error
   upload.single('upload')(req, res, (err) => {
     console.log("uploadImage, err: ", err)
@@ -77,15 +74,13 @@ router.post("/new/image", (req, res) => {
     } else if (err) {
       res.render("new-image", { error: err })
     } else {
-      res.redirect("/item//new/image")
+    // Create Item w/ the filename of the image
+      createItem(req.session.item, req.file.filename, res.locals.currentUser, (err, id) => {
+        if (err) { res.render("new-image", { error: err }) }
+        req.session.item = null;
+        res.redirect('/item/' + id)
+      })
     }
-  })
-
-  // Create Item w/ the filename of the image
-  createItem(req.session.item, req.file.filename, res.locals.currentUser, (err, id) => {
-    if (err) { res.render("new-image", { error: err }) }
-    res.session.item = null;
-    res.redirect('/item/' + id)
   })
 })
 
@@ -126,8 +121,14 @@ router.get('/:id/image/:name', async (req, res, next) => {
     const gridFSBucket = res.locals.gridFSBucket
     const imgName = req.params.name
 
-    const readStream = await gridFSBucket.openDownloadStreamByName(imgName)
-    return readStream.pipe(res)
+
+    const files = await gridFSBucket.find({ filename: imgName }).toArray()
+    if (files.length > 0) {
+      const readStream = await gridFSBucket.openDownloadStreamByName(imgName)
+      return readStream.pipe(res)
+    } else {
+      return res.send()
+    }
   } catch(err) {
       console.log("SHOW one image: error: ", err)
       // next(err) //Ça marche pas avec les images
@@ -180,6 +181,14 @@ async (item, req, res, next) => {
 //------ DELETE one item ------//
 router.delete("/:id", isLoggedIn, isOwner, async (item, req, res, next) => {
   const { id } = req.params
+  const gridFSBucket = res.locals.gridFSBucket
+
+  const items = await gridFSBucket.find({ filename: item.image }).toArray()
+  if (items.length > 0) {
+    console.log("items (before delete): ", items)
+    await gridFSBucket.delete(items[0]._id)
+  }
+
   await Item.deleteOne({ _id: id })
   req.flash('success', "Your item has been well deleted")
   res.redirect("/user/account")
@@ -194,7 +203,6 @@ router.get('/:id/image/:name/edit', isLoggedIn, isOwner, async (item, req, res, 
 
 //----- UPDATE one image (and DESTROY the previous one) -----//
 router.put('/:id/image/:name', isLoggedIn, isOwner, async (item, req, res, next) => {
-
   upload.single('upload')(req, res, async (err) => {
     let { id, name } = req.params
     if (err instanceof multer.MulterError) {
@@ -204,18 +212,23 @@ router.put('/:id/image/:name', isLoggedIn, isOwner, async (item, req, res, next)
       req.flash('error', err.message)
       res.redirect("/item/" + id + "/image/edit")
     } else {
-      const gfstream = res.locals.gfstream
+      try {
+        const gridFSBucket = res.locals.gridFSBucket
 
-      gfstream.remove({ filename: item.image, root: 'images' }, async (err, gridStore) => {
-        if (err) {
+        const items = await gridFSBucket.find({ filename: item.image }).toArray()
+        if (items.length > 0) {
+          console.log("items (before delete): ", items)
+          await gridFSBucket.delete(items[0]._id)
+        }
+        await Item.updateOne({ _id: id }, { image:  req.file.filename })
+        req.flash('success', "The image has well been updated.")
+        res.redirect("/item/" + id + "/image/" + name + "/edit")
+      } catch(err) {
+          console.log("//----- UPDATE one image (and DESTROY the previous one) -----//, error: ", err)
           req.flash('error', err.message)
           res.redirect("/item/" + id + "/image/" + name + "/edit")
-        } else {
-          req.flash('success', "The image has well been updated.")
-          await Item.updateOne({ _id: id }, { image:  req.file.filename })
-          res.redirect("/item/" + id + "/image/" + name + "/edit")
-        }
-      })
+          // next(err) //Ça marche pas avec les images
+      }
     }
   })
 })
