@@ -1,0 +1,10 @@
+extends ./parts/layout
+
+block body
+  article.item
+    h2= item.name
+    div= item.edition
+    img(class="item-list__item-image" src="/item/" + item._id + "/image/" + item.image)
+    div Price: #{item.price}
+    div Stock: #{item.stock}
+    div Condition: #{item.condition}

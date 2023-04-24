@@ -1,0 +1,19 @@
+extends ../parts/layout
+
+block body
+	section.item-list
+		each order in orders
+			article
+				div="Date of Purchase: " + order.dateOfPurchase
+				div="Total Price of the Order: " + order.totalPrice + "$"
+				section
+					each item in order.items
+						article
+							div="name: " + item.item.name
+							div="brand: " + item.item.brand
+							div="category: " + item.item.category
+							div="edition: " + item.item.edition
+							div="price: " + item.item.price + "$"
+							div="condition: " + item.item.condition
+							div="quantity: " + item.qty
+							div="total price: " + item.price + "$"

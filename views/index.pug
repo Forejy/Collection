@@ -1,0 +1,24 @@
+extends ./parts/layout
+
+block body
+  section TEST login
+    if currentUser
+      div #{ currentUser.username }
+    if info
+      div #{ info.message }
+  each package in packages
+    section
+
+      header.category-header
+        h1
+          a(href="./brand/" + package.brand)= package.brand
+      section.item-list
+        each item in package.item
+          article.item-list__item
+            a(href="./item/" + item._id)
+              img(class="item-list__item-image" src="/item/" + item._id + "/image/" + item.image)
+            div= item.price
+            if currentUser
+              div
+                a(href="/cart/add-to-cart/" + item._id) +
+                a(href="/cart/remove-from-cart/" + item._id) -

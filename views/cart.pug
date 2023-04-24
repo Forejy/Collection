@@ -1,0 +1,27 @@
+extends ./parts/layout
+
+block body
+  script(src="https://js.stripe.com/v3/")
+  script(src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch")
+
+  section
+    if cartItems
+      each cartItem in cartItems
+        div= cartItem.item.name
+        a(href='../item/' + cartItem.item._id )
+          img(class="item-list__item-image" src="/item/" + cartItem._id + "/image/" + cartItem.item.image)
+        div="quantity in cart: " + cartItem.qty
+        div="total price: " + cartItem.price
+        div
+          a(href="/cart/add-to-cart/" + cartItem.item._id) +
+          a(href="/cart/remove-one-from-cart/" + cartItem.item._id) -
+          a(href="/cart/remove-from-cart/" + cartItem.item._id) remove
+      div
+        form(method="Post" action="/cart/empty-card?_method=DELETE")
+          button(type="submit") Empty the cart
+        div="Total Amount: " + totalPrice
+        form(action="/stripe/create-checkout-session" method="POST")
+          button(type="submit") Checkout
+    else
+      div My cart is empty
+

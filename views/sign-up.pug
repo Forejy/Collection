@@ -1,0 +1,13 @@
+extends ./parts/layout
+
+block body
+  h1 Sign up
+  form(action="" method="POST")
+    label(for="username") Username
+    input(name="username" pattern="[a-zA-Z0-9@*$#~_]*" type="text" placeholder="username" required)
+    label(for="email") Email
+    input(name="email" pattern="([a-zA-Z0-9]*\.[a-zA-Z0-9]*|[a-zA-Z0-9]*)@[a-zA-Z]{3,20}\.([a-z]){2,5}" type="email" placeholder="email@mail.com" required)
+    label(for="password") Password
+    //- input(name="password" type="password" pattern="[a-zA-Z0-9!@$*()_?]*" minlength="1" required)
+    input(name="password" type="password" minlength="1" required)
+    button Sign Up

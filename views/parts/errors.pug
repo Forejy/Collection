@@ -1,0 +1,14 @@
+if errors
+  section
+    h2 Errors
+    each error in errors
+      div
+        span=error.status + ": "
+        span=error.message
+
+if flash
+  each msgs, typeMsgs in flash
+    section
+      h2.flash-title=typeMsgs
+      each msg in msgs
+        div=msg

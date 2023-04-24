@@ -1,0 +1,10 @@
+extends ./parts/layout
+
+block body
+  section
+    form(action="/item/new/image" method="POST" enctype="multipart/form-data")
+      ul.form
+        li
+          label(for="upload")
+          input(type="file" id="upload" name="upload" accept="image/png, image/jpeg")
+        button Upload Image

@@ -1,0 +1,50 @@
+extends ./parts/layout
+
+block body
+  //- section
+  //-   if errors
+  //-     h2 Errors
+  //-     each error in errors
+  //-       div
+  //-         span=error.param + ": "
+  //-         span=error.msg
+  form(action="/item/new" method="POST")
+    ul.form
+      li
+        label(for="name") Name
+        input(type="text" name="name" placeholder="name" autofocus required)
+      li
+        label(for="brand") Brand
+        select(name="brand" required)
+          option(value="" selected) --Please choose an option--
+          each brand in brands
+            option(value=brand)= brand
+          //- request to admin for a new one
+      li
+        label(for="category") Category
+        select(name="category" required)
+          option(value="" selected) --Please choose an option--
+          each category in categories
+            option(value=category)= category
+          //- request to admin for a new one
+      li
+        label(for="edition") Edition
+        input(type="text" name="edition" placeholder="edition" required)
+          //- request to admin for a new one
+      li
+        label(for="additional") Additional
+        input(type="text" name="additional" placeholder="additional" required)
+      li
+        label(for="price") Price
+        input(type="number" name="price" placeholder="price" min="0" step=".01" required)
+      li
+        label(for="stock") Stock
+        input(type="number" name="stock" placeholder="stock" min="1" max="100" required)
+      li
+        label(for="condition") Condition
+        select(name="condition" required)
+          option(value="" selected) --Please choose an option--
+          each condition in conditions
+            option(value=condition)= condition
+      button Create Item
+      div Next Step : Add Image

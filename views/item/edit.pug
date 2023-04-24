@@ -1,0 +1,55 @@
+extends ../parts/layout
+
+block body
+	section.container.item-list
+		section
+			article.item
+				h2= item.name
+				div= item.edition
+				img(class="item-list__item-image" src="/item/" + item._id + "/image/" + item.image)
+				div Price: #{item.price}
+				div Stock: #{item.stock}
+				div Condition: #{item.condition}
+		section
+			form(action="/item/new" method="POST")
+			form(action="/item/" + item._id + "?_method=PUT" method="POST")
+				ul.form
+					li
+						label(for="name") Name
+						input(type="text" name="name" value=item.name autofocus required)
+					li
+						label(for="brand") Brand
+						select(name="brand" required)
+							option(value=item.brand selected) -- #{item.brand} --
+								each brand in brands
+									option(value=brand)= brand
+							//- request to admin for a new one
+					li
+						label(for="category") Category
+						select(name="category" required)
+							option(value=item.category selected) -- #{item.category} --
+								each category in categories
+									option(value=category)= category
+							//- request to admin for a new one
+					li
+						label(for="edition") Edition
+						input(type="text" name="edition" value=item.edition required)
+							//- request to admin for a new one
+					li
+						label(for="additional") Additional
+						input(type="text" name="additional" value=item.additional)
+					li
+						label(for="price") Price
+						input(type="number" name="price" value=item.price   min="0" step=".01" required)
+					li
+						label(for="stock") Stock
+						input(type="number" name="stock" value=item.stock min="1" max="100" required)
+					li
+						label(for="condition") Condition
+						select(name="condition" required)
+							option(value=item.condition selected) -- #{item.condition} --
+								each condition in conditions
+									option(value=condition)= condition
+					button Update Item
+					div
+						a(href="./image/" + image + "/edit") Change Image

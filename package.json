@@ -1,0 +1,39 @@
+{
+  "name": "collection",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "export NODE_ENV=development && node --trace-deprecation ./bin/www",
+    "watch": "nodemon --ext js --ignore public"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^7.6.0",
+    "bcryptjs": "*",
+    "body-parser": "^1.19.0",
+    "connect-flash": "*",
+    "connect-livereload": "*",
+    "connect-mongo": "*",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "10.0.0",
+    "express": "~4.16.1",
+    "express-session": "*",
+    "express-validator": "^6.13.0",
+    "gridfs-stream": "*",
+    "http-errors": "~1.6.3",
+    "livereload": "*",
+    "method-override": "*",
+    "mongodb": "^4.1.4",
+    "mongoose": "~5.13.7",
+    "morgan": "~1.9.1",
+    "multer": "*",
+    "multer-gridfs-storage": "*",
+    "node-fetch": "^2.6.6",
+    "nodemon": "^2.0.14",
+    "passport": "*",
+    "passport-local": "*",
+    "phin": "*",
+    "pug": "2.0.0-beta11",
+    "stripe": "^8.186.1"
+  }
+}

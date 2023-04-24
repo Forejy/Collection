@@ -1,0 +1,19 @@
+extends ../../parts/layout
+
+block body
+	section.container.item-list
+		section
+			article.item
+			h2= item.name
+			div= item.edition
+			img(class="item-list__item-image" src="/item/" + item._id + "/image/" + item.image)
+			div Price: #{item.price}
+			div Stock: #{item.stock}
+			div Condition: #{item.condition}
+		section
+			form(action="/item/" + item._id + "/image/" + image + "?_method=PUT" method="POST" enctype="multipart/form-data")
+				ul.form
+					li
+						label(for="upload")
+						input(type="file" id="upload" name="upload" accept="image/png, image/jpeg")
+					button Upload Image

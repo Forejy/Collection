@@ -1,0 +1,13 @@
+extends ./parts/layout
+
+block body
+  h1 Log In
+  if message
+    div= message
+
+  form(action="/user/login" method="POST")
+    label(for="username") Username
+    input(name="username" placeholder="username" type="text")
+    label(for="password") Password
+    input(name="password" type="password")
+    button Log In
